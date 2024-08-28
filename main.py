@@ -1,41 +1,57 @@
+def cargar_caracteres_en_vector(nombre_archivo):
+    # Inicializar una lista para almacenar los caracteres
+    vector_caracteres = []
+    # Abrir el archivo en modo lectura
+    with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
+        # Leer el contenido del archivo
+        contenido = archivo.read()  
+        # Agregar cada carácter del contenido a la lista
+        vector_caracteres.extend(contenido)
+    return vector_caracteres
 
-def contar_frecuencias(nombre_archivo):
-    # Crear un diccionario para contar la frecuencia de cada carácter
-    frecuencias = {}
-    caracteres = {}
 
-    try:
-        # Abrir el archivo en modo lectura
-        with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
-            # Leer el contenido del archivo
-            contenido = archivo.read()
-            
-            # Iterar sobre cada carácter en el contenido
-            for caracter in contenido:
-                # Actualizar la frecuencia del carácter en el diccionario
-                if caracter in frecuencias:
-                    frecuencias[caracter] += 1
-                else:
-                    caracteres[caracter] = caracter
-                    frecuencias[caracter] = 1
-        
-        # Crear una lista de frecuencias
-        lista_frecuencias = [frecuencias[caracter] for caracter in frecuencias]
-        lista_caracteres= [caracteres[caracter] for caracter in caracteres]
-        return lista_frecuencias , lista_caracteres
-
-    except FileNotFoundError:
-        print(f"Error: El archivo '{nombre_archivo}' no se encontró.")
-        return []
-    except IOError as e:
-        print(f"Error de entrada/salida: {e}")
-        return []
-
-def vec_extension():
+def contar_frecuencias(vector):
+    """
+    Genera dos vectores: uno con los caracteres únicos y otro con sus frecuencias.
+    Luego ordena los caracteres por frecuencia en orden descendente.
     
+    Args:
+        vector (list): Lista de caracteres.
+    
+    Returns:
+        tuple: Dos listas, la primera con los caracteres únicos y la segunda con las frecuencias.
+    """
+    # Crear un diccionario para contar frecuencias
+    frecuencias = {}
+    
+    # Contar la frecuencia de cada carácter
+    for caracter in vector:
+        if caracter in frecuencias:
+            frecuencias[caracter] += 1
+        else:
+            frecuencias[caracter] = 1
+    
+    # Ordenar los caracteres por frecuencia en orden descendente
+    tipos_ordenados = sorted(frecuencias.keys(), key=lambda k: frecuencias[k], reverse=True)
+    frecuencias_ordenadas = [frecuencias[tipo] for tipo in tipos_ordenados]
+    
+    return tipos_ordenados, frecuencias_ordenadas
 
+def crea_vec_estacionario(frecuencias):
+    vec = {}
+    total = sum(frecuencias)
+    vec = frecuencias
+    vec = [elemento / total for elemento in vec]
+    return vec
+    
+def crea_matriz_trans(caracteres,):
+
+    return
 # Ejemplo de uso de la función
 nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
-frecuencias, caracteres = contar_frecuencias(nombre_archivo)
+vec = cargar_caracteres_en_vector(nombre_archivo)
+caracteres, frecuencias = contar_frecuencias(vec)
+vec_estacionario = crea_vec_estacionario(frecuencias)
+print(vec_estacionario)
 print(caracteres)
 print("Frecuencias:", frecuencias)
