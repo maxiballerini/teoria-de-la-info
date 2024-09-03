@@ -47,7 +47,7 @@ def crea_vec_estacionario(frecuencias):
 def crea_matriz_trans(caracteres,):
 
     return
-# Ejemplo de uso de la función
+
 nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
 vec = cargar_caracteres_en_vector(nombre_archivo)
 caracteres, frecuencias = contar_frecuencias(vec)
