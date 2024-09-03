@@ -1,5 +1,6 @@
 from collections import Counter
 import numpy as np
+
 def leer_archivo(nombre_archivo):
     # Inicializar una lista para almacenar los caracteres
     vector_caracteres = []
@@ -49,6 +50,20 @@ def crea_matriz_trans(vec, caracteres):
     
     return matriz_transicion
 
+def entropia(vec_probabilidades):
+    #funcion que calcula la entropia haciendo la sumatoria en el for
+    suma = 0
+
+    for i in range(len(vec_probabilidades)):
+        suma += vec_probabilidades[i]*np.log2(1/vec_probabilidades[i])
+
+    return suma
+
+def extension_de_la_fuente(vector_variable,vector_fijo):
+    
+    return [x * y for x in vector_variable for y in vector_fijo]
+
+
 #nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
 #vec = leer_archivo(nombre_archivo)
 vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
@@ -56,9 +71,7 @@ caracteres,frecuencias = contar_frecuencias(vec)
 vec_probabilidades = crea_vec_probailidades(frecuencias)
 matriz_transicion = crea_matriz_trans(vec,caracteres)
 
-print(matriz_transicion)
-
-
-
+print("\n matriz: \n",matriz_transicion)
+print("\n entropia :",entropia(vec_probabilidades),"\n")
 
 
