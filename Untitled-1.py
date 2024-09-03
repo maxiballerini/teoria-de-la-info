@@ -62,6 +62,23 @@ def contar_frecuencia(vector_arch,caracteres):
     # devuelve un vector con la frecuencia de las letras
     return [vector_arch.count(pos) for pos in caracteres]
 
+def crear_matriz_prob(matrix):
+    size = len(matrix)
+
+    # Verificar si la matriz es cuadrada
+    if any(len(row) != size for row in matrix):
+        raise ValueError("La matriz no es cuadrada")
+    
+    # Inicializar el vector de frecuencias
+    frecuencias = [0]*size
+    
+    # Calcular la suma de cada columna
+    for j in range(size):
+        for i in range(size):
+            frecuencias[j] += matrix[i][j]
+    
+    return frecuencias
+
 # Ejemplo de uso
 secuencia = "BBAAACCAAABCCCAACCCBBACCAABBAA"
 matriz_transicion, caracteres = crear_matriz_transicion(secuencia)
@@ -70,3 +87,9 @@ print("\n\n")
 
 print("Matriz de transición:")
 imprimir_matriz(matriz_transicion, caracteres)
+print("\n\n")
+
+#print("Matriz de transición:")
+#crear_matriz_prob(matriz_transicion)
+#imprimir_matriz(matriz_transicion, caracteres)
+#print("\n\n")
