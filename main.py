@@ -1,4 +1,6 @@
-def cargar_caracteres_en_vector(nombre_archivo):
+from collections import Counter
+import numpy as np
+def leer_archivo(nombre_archivo):
     # Inicializar una lista para almacenar los caracteres
     vector_caracteres = []
     # Abrir el archivo en modo lectura
@@ -10,48 +12,53 @@ def cargar_caracteres_en_vector(nombre_archivo):
     return vector_caracteres
 
 
-def contar_frecuencias(vector):
-    """
-    Genera dos vectores: uno con los caracteres únicos y otro con sus frecuencias.
-    Luego ordena los caracteres por frecuencia en orden descendente.
-    
-    Args:
-        vector (list): Lista de caracteres.
-    
-    Returns:
-        tuple: Dos listas, la primera con los caracteres únicos y la segunda con las frecuencias.
-    """
-    # Crear un diccionario para contar frecuencias
-    frecuencias = {}
-    
-    # Contar la frecuencia de cada carácter
-    for caracter in vector:
-        if caracter in frecuencias:
-            frecuencias[caracter] += 1
-        else:
-            frecuencias[caracter] = 1
-    
-    # Ordenar los caracteres por frecuencia en orden descendente
-    tipos_ordenados = sorted(frecuencias.keys(), key=lambda k: frecuencias[k], reverse=True)
-    frecuencias_ordenadas = [frecuencias[tipo] for tipo in tipos_ordenados]
-    
-    return tipos_ordenados, frecuencias_ordenadas
+def contar_frecuencias(vec):
+    #cuenta las apariciones de cada caracter
+    frecuencias = Counter(vec)
+    caracteres_unicos = sorted(frecuencias.keys())
+    vector = [frecuencias[char] for char in caracteres_unicos]
 
-def crea_vec_estacionario(frecuencias):
+    return caracteres_unicos, vector
+
+
+def crea_vec_probailidades(frecuencias):
     vec = {}
     total = sum(frecuencias)
     vec = frecuencias
     vec = [elemento / total for elemento in vec]
     return vec
     
-def crea_matriz_trans(caracteres,):
+def crea_matriz_trans(vec, caracteres):
+    n = len(caracteres)
+    #indexea los caracteres
+    char_index = {char: idx for idx, char in enumerate(caracteres)}
+    
+    # Inicializa la matriz de transición con ceros
+    matriz_transicion = np.zeros((n, n), dtype=float)
+    
+    # Contar las transiciones entre caracteres
+    for (current_char, next_char) in zip(vec[:-1], vec[1:]):
+        i = char_index[current_char]
+        j = char_index[next_char]
+        matriz_transicion[j, i] += 1
 
-    return
+    for j in range(n):
+        columna_suma = matriz_transicion[:,j].sum()
+        if columna_suma > 0:
+            matriz_transicion[:,j] /= columna_suma
+    
+    return matriz_transicion
 
-nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
-vec = cargar_caracteres_en_vector(nombre_archivo)
-caracteres, frecuencias = contar_frecuencias(vec)
-vec_estacionario = crea_vec_estacionario(frecuencias)
-print(vec_estacionario)
-print(caracteres)
-print("Frecuencias:", frecuencias)
+#nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
+#vec = leer_archivo(nombre_archivo)
+vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
+caracteres,frecuencias = contar_frecuencias(vec)
+vec_probabilidades = crea_vec_probailidades(frecuencias)
+matriz_transicion = crea_matriz_trans(vec,caracteres)
+
+print(matriz_transicion)
+
+
+
+
+
