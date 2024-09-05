@@ -76,15 +76,35 @@ def extension_de_la_fuente(caracteres,probabilidades):
     for seq, prob in sequence_probabilities:
         print(f"Secuencia: {''.join(seq)}, Probabilidad: {prob:.5f}")
 
+def Vector_estacionario_iterativo(matriz,cantidad):
+    # matriz es la de probabilidades
+    # cantidad es el numero de interacciones a realizar
+
+    vector = np.array([1/3, 1/3, 1/3])
+    for i in range(cantidad):
+        vector = np.dot(matriz, vector) 
+
+    return vector
+
+def Rango_Nulo(vec_E,vec_I,valor):
+    
+    vec = vec_E-vec_I
+    vec = np.abs(vec)
+
+    if np.all(vec < valor):
+        print("tiene memoria no nula")
+    else:
+        print("tiene memoria nula")
+
 #nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
 #vec = leer_archivo(nombre_archivo)
 vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
 caracteres,frecuencias = contar_frecuencias(vec)
 vec_probabilidades = crea_vec_probailidades(frecuencias)
-print(vec_probabilidades)
+print("\n vector estacionario: \n",vec_probabilidades,"\n")
 matriz_transicion = crea_matriz_trans(vec,caracteres)
 extension_de_la_fuente(caracteres,vec_probabilidades)
 print("\n matriz: \n",matriz_transicion)
 print("\n entropia :",entropia(vec_probabilidades),"\n")
-
-
+vector_iterativo = Vector_estacionario_iterativo(matriz_transicion,3) # 3 es la cat de iteraciones
+print("\n Vector iterativo con 3 pasos: ",vector_iterativo)
