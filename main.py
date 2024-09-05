@@ -1,5 +1,6 @@
 from collections import Counter
 import numpy as np
+from itertools import product
 
 def leer_archivo(nombre_archivo):
     # Inicializar una lista para almacenar los caracteres
@@ -59,18 +60,30 @@ def entropia(vec_probabilidades):
 
     return suma
 
-def extension_de_la_fuente(vector_variable,vector_fijo):
+def extension_de_la_fuente(caracteres,probabilidades):
     
-    return [x * y for x in vector_variable for y in vector_fijo]
 
+    # Crear un diccionario que asocia los símbolos con sus probabilidades
+    prob_dict = dict(zip(caracteres, probabilidades))
+
+    # Generar todas las combinaciones posibles de longitud 3
+    sequences = list(product(caracteres, repeat=len(caracteres)))
+
+    # Calcular la probabilidad de cada secuencia
+    sequence_probabilities = [(seq, prob_dict[seq[0]] * prob_dict[seq[1]] * prob_dict[seq[2]]) for seq in sequences]
+
+    # Mostrar los resultados
+    for seq, prob in sequence_probabilities:
+        print(f"Secuencia: {''.join(seq)}, Probabilidad: {prob:.5f}")
 
 #nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
 #vec = leer_archivo(nombre_archivo)
 vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
 caracteres,frecuencias = contar_frecuencias(vec)
 vec_probabilidades = crea_vec_probailidades(frecuencias)
+print(vec_probabilidades)
 matriz_transicion = crea_matriz_trans(vec,caracteres)
-
+extension_de_la_fuente(caracteres,vec_probabilidades)
 print("\n matriz: \n",matriz_transicion)
 print("\n entropia :",entropia(vec_probabilidades),"\n")
 
