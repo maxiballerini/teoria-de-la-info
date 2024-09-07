@@ -23,7 +23,7 @@ def contar_frecuencias(vec):
     return caracteres_unicos, vector
 
 
-def crea_vec_probailidades(frecuencias):
+def crea_vec_probabilidades(frecuencias):
     vec = {}
     total = sum(frecuencias)
     vec = frecuencias
@@ -51,7 +51,7 @@ def crea_matriz_trans(vec, caracteres):
     
     return matriz_transicion
 
-def entropia(vec_probabilidades):
+def calcular_entropia(vec_probabilidades):
     #funcion que calcula la entropia haciendo la sumatoria en el for
     suma = 0
 
@@ -60,7 +60,22 @@ def entropia(vec_probabilidades):
 
     return suma
 
-def extension_de_la_fuente(caracteres,probabilidades):
+def calcular_entropia_condicional(matriz_transicion, vector_estacionario):
+    
+    entropia_condicional = 0
+
+    for j in range(len(vector_estacionario)):
+        probabilidades = matriz_transicion[:, j]
+        
+        # Evitar problemas con logaritmo de 0
+        probabilidades = probabilidades[probabilidades> 0]
+        
+        # Sumar el cálculo de la entropía condicional
+        entropia_condicional += np.sum(probabilidades * np.log2(1 / probabilidades)) * vector_estacionario[j]
+    
+    return entropia_condicional
+
+def extension_de_la_fuente(caracteres, probabilidades):
     
 
     # Crear un diccionario que asocia los símbolos con sus probabilidades
@@ -86,25 +101,39 @@ def Vector_estacionario_iterativo(matriz,cantidad):
 
     return vector
 
-def Rango_Nulo(vec_E,vec_I,valor):
+def es_memoria_nula(entropia_m, entropia_c, tol):
     
-    vec = vec_E-vec_I
-    vec = np.abs(vec)
+    valor = abs(entropia_m - entropia_c);
+    print(valor)
 
-    if np.all(vec < valor):
-        print("tiene memoria no nula")
+    if valor < tol:
+        return True
     else:
-        print("tiene memoria nula")
+        return False
 
-#nombre_archivo = 'D:/universidad/teoriainfo/tp1/.venv/tp1/tp1_sample3.txt'
-#vec = leer_archivo(nombre_archivo)
-vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
-caracteres,frecuencias = contar_frecuencias(vec)
-vec_probabilidades = crea_vec_probailidades(frecuencias)
-print("\n vector estacionario: \n",vec_probabilidades,"\n")
-matriz_transicion = crea_matriz_trans(vec,caracteres)
-extension_de_la_fuente(caracteres,vec_probabilidades)
-print("\n matriz: \n",matriz_transicion)
-print("\n entropia :",entropia(vec_probabilidades),"\n")
-vector_iterativo = Vector_estacionario_iterativo(matriz_transicion,3) # 3 es la cat de iteraciones
-print("\n Vector iterativo con 3 pasos: ",vector_iterativo)
+nombre_archivo = 'tp1_samples/tp1_sample3.txt'
+vec = leer_archivo(nombre_archivo)
+#vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
+caracteres, frecuencias = contar_frecuencias(vec)
+
+vec_probabilidades = crea_vec_probabilidades(frecuencias)
+# print("\n vector estacionario: \n", vec_probabilidades, "\n")
+
+matriz_transicion = crea_matriz_trans(vec, caracteres)
+
+print("a) Matriz: \n", matriz_transicion)
+
+entropia_m = calcular_entropia(vec_probabilidades)
+vector_iterativo = Vector_estacionario_iterativo(matriz_transicion, 3) # 3 es la cant de iteraciones
+entropia_c = calcular_entropia_condicional(matriz_transicion, vector_iterativo)
+
+resultado = es_memoria_nula(entropia_m, entropia_c, 0.005)
+if(resultado):
+    print("b) La fuente es de memoria nula")
+    print("c) Vector de probabilidades: \n", vec_probabilidades)
+    extension_de_la_fuente(caracteres, vec_probabilidades)
+    print("e) Entropía: ", entropia_m)
+else:
+    print("b) La fuente es de memoria no nula")
+    print("d) Vector estacionario: ", Vector_estacionario_iterativo)
+    print("e) Entropía: ", entropia_c)
