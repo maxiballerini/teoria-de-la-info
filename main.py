@@ -94,8 +94,10 @@ def extension_de_la_fuente(caracteres, probabilidades):
 def Vector_estacionario_iterativo(matriz,cantidad):
     # matriz es la de probabilidades
     # cantidad es el numero de interacciones a realizar
-
-    vector = np.array([1/3, 1/3, 1/3])
+    
+    n = len(matriz)
+    vector = [1/n for _ in range(n)]
+    
     for i in range(cantidad):
         vector = np.dot(matriz, vector) 
 
@@ -111,7 +113,27 @@ def es_memoria_nula(entropia_m, entropia_c, tol):
     else:
         return False
 
-nombre_archivo = 'tp1_samples/tp1_sample3.txt'
+def crear_vector_estacionario(matriz):
+    
+    n = len(matriz)
+    
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                matriz[i,j] -=1
+    
+    # Agregar la ecuación de normalización: V1 + V2 + ... + Vn = 1
+    ecuacion_normalizacion = np.ones((1, n))
+    
+    # Crear la nueva matriz del sistema agregando la ecuación de normalización
+    matriz = np.vstack([matriz, ecuacion_normalizacion])
+
+    vector_independiente = np.zeros(n + 1)
+    vector_independiente[n] = 1
+
+    return np.linalg.lstsq(matriz, vector_independiente, rcond=None)[0]
+
+nombre_archivo = 'tp1_samples/tp1_sample0.txt'
 vec = leer_archivo(nombre_archivo)
 #vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
 caracteres, frecuencias = contar_frecuencias(vec)
@@ -135,5 +157,5 @@ if(resultado):
     print("e) Entropía: ", entropia_m)
 else:
     print("b) La fuente es de memoria no nula")
-    print("d) Vector estacionario: ", Vector_estacionario_iterativo)
+    print("d) Vector estacionario: ", crear_vector_estacionario(matriz_transicion))
     print("e) Entropía: ", entropia_c)
