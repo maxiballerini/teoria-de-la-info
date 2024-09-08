@@ -3,6 +3,13 @@ import numpy as np
 from itertools import product
 
 def leer_archivo(nombre_archivo):
+    """
+    Funcion para leer un archivo y guardar su contenido en un array
+
+    Retorna:
+    cadena de caracteres
+    """
+
     # Inicializar una lista para almacenar los caracteres
     vector_caracteres = []
     # Abrir el archivo en modo lectura
@@ -15,6 +22,13 @@ def leer_archivo(nombre_archivo):
 
 
 def contar_frecuencias(vec):
+    """
+    Funcion para contar la frecuencia de caracteres e indexarlos
+
+    Retorna:
+    vector de caracteres unicos y el vector con su cantidad de apariciones
+    """
+     
     #cuenta las apariciones de cada caracter
     frecuencias = Counter(vec)
     caracteres_unicos = sorted(frecuencias.keys())
@@ -24,6 +38,13 @@ def contar_frecuencias(vec):
 
 
 def crea_vec_probabilidades(frecuencias):
+    """
+    Funcion para obtener el vector de probabilidades
+
+    Retorna:
+    vector de probabilidades
+    """
+
     vec = {}
     total = sum(frecuencias)
     vec = frecuencias
@@ -31,6 +52,14 @@ def crea_vec_probabilidades(frecuencias):
     return vec
     
 def crea_matriz_trans(vec, caracteres):
+    """
+    Funcion para crear la matriz de probabilidades de transicion
+
+    Retorna:
+    matriz transicion
+    """
+
+
     n = len(caracteres)
     #indexea los caracteres
     char_index = {char: idx for idx, char in enumerate(caracteres)}
@@ -52,7 +81,12 @@ def crea_matriz_trans(vec, caracteres):
     return matriz_transicion
 
 def calcular_entropia(vec_probabilidades):
-    #funcion que calcula la entropia haciendo la sumatoria en el for
+    """""
+    funcion que calcula la entropia haciendo la sumatoria en el for
+    
+    Retorna:
+    float: entropia
+    """
     suma = 0
 
     for i in range(len(vec_probabilidades)):
@@ -92,9 +126,16 @@ def extension_de_la_fuente(caracteres, probabilidades):
         print(f"Secuencia: {''.join(seq)}, Probabilidad: {prob:.5f}")
 
 def Vector_estacionario_iterativo(matriz,cantidad):
-    # matriz es la de probabilidades
-    # cantidad es el numero de interacciones a realizar
-    
+    """"
+    funcion para calcular el vector iterativo en una cantidad ingresada por parametros
+
+    matriz es la de probabilidades
+    cantidad es el numero de interacciones a realizar
+
+    Retorna:
+    vector final
+    """
+
     n = len(matriz)
     vector = [1/n for _ in range(n)]
     
@@ -104,7 +145,9 @@ def Vector_estacionario_iterativo(matriz,cantidad):
     return vector
 
 def es_memoria_nula(entropia_m, entropia_c, tol):
-    
+    """"
+    funcion para saber si la memoria de la fuente es nula
+    """
     valor = abs(entropia_m - entropia_c);
     print(valor)
 
@@ -114,9 +157,17 @@ def es_memoria_nula(entropia_m, entropia_c, tol):
         return False
 
 def crear_vector_estacionario(matriz):
-    
+    """"
+    funcion para obtener el vector estacionario
+
+    retorna:
+    vector estacionario
+    """
+
+    # tamaño de la matriz cuadrada
     n = len(matriz)
     
+    # realiza la resta con la matriz de probabilidades y una matriz de identidad
     for i in range(n):
         for j in range(n):
             if i == j:
@@ -128,6 +179,7 @@ def crear_vector_estacionario(matriz):
     # Crear la nueva matriz del sistema agregando la ecuación de normalización
     matriz = np.vstack([matriz, ecuacion_normalizacion])
 
+    # crea el vector independiente para despues realizar el sistema de ecuaciones con la libreria del return
     vector_independiente = np.zeros(n + 1)
     vector_independiente[n] = 1
 
@@ -135,21 +187,19 @@ def crear_vector_estacionario(matriz):
 
 nombre_archivo = 'tp1_samples/tp1_sample0.txt'
 vec = leer_archivo(nombre_archivo)
-#vec = "BBAAACCAAABCCCAACCCBBACCAABBAA"
 caracteres, frecuencias = contar_frecuencias(vec)
 
 vec_probabilidades = crea_vec_probabilidades(frecuencias)
-# print("\n vector estacionario: \n", vec_probabilidades, "\n")
 
 matriz_transicion = crea_matriz_trans(vec, caracteres)
 
 print("a) Matriz: \n", matriz_transicion)
 
 entropia_m = calcular_entropia(vec_probabilidades)
-vector_iterativo = Vector_estacionario_iterativo(matriz_transicion, 3) # 3 es la cant de iteraciones
+vector_iterativo = Vector_estacionario_iterativo(matriz_transicion, 30) # 30 es la cant de iteraciones
 entropia_c = calcular_entropia_condicional(matriz_transicion, vector_iterativo)
 
-resultado = es_memoria_nula(entropia_m, entropia_c, 0.005)
+resultado = es_memoria_nula(entropia_m, entropia_c, 0.005) # 0.005 es el margen maximo de error
 if(resultado):
     print("b) La fuente es de memoria nula")
     print("c) Vector de probabilidades: \n", vec_probabilidades)
