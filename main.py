@@ -237,10 +237,6 @@ def crear_vector_estacionario(matriz):
 nombre_archivo = sys.argv[1]
 
 if len(sys.argv) > 1:
-    if(len(sys.argv) > 2):
-        N = int(sys.argv[2])
-    else:
-        N = 2;
 
     vec = leer_archivo(nombre_archivo)
     caracteres, frecuencias = contar_frecuencias(vec)
@@ -248,6 +244,11 @@ if len(sys.argv) > 1:
     vec_probabilidades = crea_vec_probabilidades(frecuencias)
 
     matriz_transicion = crea_matriz_trans(vec, caracteres)
+
+    if(len(sys.argv) > 2):
+        N = int(sys.argv[2])
+    else:
+        N = len(caracteres);
 
     print(f"a) Matriz:\n{matriz_transicion}\n")
 
