@@ -17,7 +17,7 @@ def leer_archivo(nombre_archivo):
     # Inicializar una lista para almacenar los caracteres
     vector_caracteres = []
     # Abrir el archivo en modo lectura
-    with open(nombre_archivo, 'r', encoding='utf-8') as archivo:
+    with open(nombre_archivo, 'r', encoding='utf-8', errors='ignore') as archivo:
         # Leer el contenido del archivo
         contenido = archivo.read()  
         # Agregar cada carácter del contenido a la lista
@@ -157,13 +157,13 @@ def extension_de_la_fuente(N, caracteres, probabilidades):
 
     # Calcular la probabilidad de cada secuencia
     sequence_probabilities = [
-        (seq, product(prob_dict[char] for char in seq))
+        (seq, np.prod([prob_dict[char] for char in seq]))
         for seq in sequences
     ]
 
     # Mostrar los resultados
     for seq, prob in sequence_probabilities:
-        print(f"Secuencia: {''.join(seq)}, Probabilidad: {prob:.5f}")
+        print(f"Secuencia: [{''.join(seq)}] Probabilidad: {prob:.5f}")
 
 def vector_estacionario_iterativo(matriz, cantidad):
     """"
@@ -234,12 +234,14 @@ def crear_vector_estacionario(matriz):
     return np.linalg.lstsq(matriz, vector_independiente, rcond=None)[0]
 
 # Obtener el nombre del archivo
-nombre_archivo = sys.argv[0]
+nombre_archivo = sys.argv[1]
 
-# Obtener el primer argumento (si existe)
 if len(sys.argv) > 1:
-    N = sys.argv[1]
-    # nombre_archivo = 'tp1_samples/tp1_sample0.txt'
+    if(len(sys.argv) > 2):
+        N = int(sys.argv[2])
+    else:
+        N = 2;
+
     vec = leer_archivo(nombre_archivo)
     caracteres, frecuencias = contar_frecuencias(vec)
 
@@ -247,22 +249,22 @@ if len(sys.argv) > 1:
 
     matriz_transicion = crea_matriz_trans(vec, caracteres)
 
-    print("a) Matriz: \n", matriz_transicion)
+    print(f"a) Matriz:\n{matriz_transicion}\n")
 
     entropia = calcular_entropia(vec_probabilidades)
     vector_iterativo = vector_estacionario_iterativo(matriz_transicion, 30) # 30 es la cant de iteraciones
     entropia_c = calcular_entropia_condicional(matriz_transicion, vector_iterativo)
 
     resultado = es_memoria_nula(entropia, entropia_c, 0.005) # 0.005 es el margen maximo de error
-
     if(resultado):
-        print("b) La fuente es de memoria nula")
-        print("c) Vector de probabilidades: \n", vec_probabilidades)
-        extension_de_la_fuente(N, vec_probabilidades)
-        print("e) Entropía: ", entropia)
+        print("b) La fuente es de memoria nula\n")
+        print("c)")
+        extension_de_la_fuente(N, caracteres, vec_probabilidades)
+        print(f"Entropía orden {N}: {entropia*N} bits\n")
+        print(f"e) Entropía de la fuente: {entropia} bits\n")
     else:
-        print("b) La fuente es de memoria no nula")
+        print("b) La fuente es de memoria no nula\n")
         print("d) Vector estacionario: ", crear_vector_estacionario(matriz_transicion))
-        print("e) Entropía: ", entropia_c)
+        print(f"e) Entropía de la fuente: {entropia_c} bits\n")
 else:
     print("No se proporcionó un nombre")
