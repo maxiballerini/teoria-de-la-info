@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import random
 from collections import Counter
 from itertools import product
 
@@ -27,6 +28,24 @@ def codigoInstantaneo(palabras):
                 return False
     return True
 
+def crea_archivo(nombre_archivo, N, vector_palabras_cifradas, vector_prob):
+    with open(nombre_archivo, 'w', encoding='utf-8', errors='ignore') as arch:
+        for i in range(N):
+            palabra = montecarlo(vector_prob, vector_palabras_cifradas)
+            arch.write(palabra)
+
+def montecarlo(probabilidades, palabras):
+    # Generar un número aleatorio entre 0 y 1
+    r = random.random()
+    
+    # Inicializar el acumulador de probabilidades
+    acumulador = 0.0
+    
+    # Iterar sobre las probabilidades y las palabras
+    for i, p in enumerate(probabilidades):
+        acumulador += p
+        if r < acumulador:
+            return palabras[i]  # Retorna la palabra seleccionada
 
 nombre_archivo = "tp2_sample0.txt"
 palabras, caracteres_unicos = almacenar_palabras_y_crear_abecedario_unico(nombre_archivo)
