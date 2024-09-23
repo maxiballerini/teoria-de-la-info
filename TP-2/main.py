@@ -28,6 +28,12 @@ def codigoInstantaneo(palabras):
                 return False
     return True
 
+def generaVectorProbabilidades(palabras, cant_simbolos_unicos):
+    vectorProbabilidades = []
+    for palabra in palabras:
+        vectorProbabilidades.append(round((1 / cant_simbolos_unicos) ** (len(palabra)), 6))
+    return vectorProbabilidades
+
 def crea_archivo(nombre_archivo, N, vector_palabras_cifradas, vector_prob):
     with open(nombre_archivo, 'w', encoding='utf-8', errors='ignore') as arch:
         for i in range(N):
@@ -59,6 +65,10 @@ else:
 
 if codigoInstantaneo(palabras):
     print("Es código instantáneo")
+    vectorProbabilidades = generaVectorProbabilidades(palabras, len(caracteres_unicos))
+    print("Las palabras sí pueden generar un código compacto, sus probabilidades serían: ")
+    print(palabras)
+    print(vectorProbabilidades)
 else:
     print("No es código instantáneo")
 
