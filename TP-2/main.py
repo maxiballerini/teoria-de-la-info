@@ -1,10 +1,11 @@
 import sys
 import numpy as np
+import math
 import random
 from collections import Counter
 from itertools import product
 
-def almacenar_palabras_y_crear_abecedario_unico(nombre_archivo):
+def almacena_palabras_y_crea_abecedario_unico(nombre_archivo):
     with open(nombre_archivo, 'r', encoding='utf-8', errors='ignore') as archivo:
         contenido = archivo.read()
         vector_palabras = contenido.split()  # Separar palabras por espacios
@@ -13,14 +14,14 @@ def almacenar_palabras_y_crear_abecedario_unico(nombre_archivo):
         return vector_palabras, vector_caracteres_unicos
     
 
-def inecuacionKraftMcMillan(r, palabras):
+def inecuacion_KraftMcMillan(palabras, r):
     sumatoria = 0
     for palabra in palabras:
         longitud = len(palabra)  # Obtener la longitud de la palabra
-        sumatoria += r ** -longitud    # Sumar r elevado a -longitud
-    return sumatoria <= 1 
+        sumatoria += r ** (-longitud)    # Sumar r elevado a -longitud
+    return sumatoria 
 
-def codigoInstantaneo(palabras):
+def codigo_instantaneo(palabras):
     palabras = sorted(palabras, key=len)  # Ordena por longitud para reducir el numero de comparaciones
     for i in range(len(palabras)):
         for j in range(i + 1, len(palabras)):
@@ -28,11 +29,23 @@ def codigoInstantaneo(palabras):
                 return False
     return True
 
-def generaVectorProbabilidades(palabras, cant_simbolos_unicos):
+def genera_vector_probabilidades(palabras, r):
     vectorProbabilidades = []
     for palabra in palabras:
-        vectorProbabilidades.append(round((1 / cant_simbolos_unicos) ** (len(palabra)), 6))
+        vectorProbabilidades.append(round((1 / r) ** (len(palabra)), 6))
     return vectorProbabilidades
+
+def calcula_entropia(vector_probabilidades, base):
+    entropia = 0
+    for valor in vector_probabilidades:
+        entropia += valor * math.log(1/valor, base)
+    return round(entropia, 3)
+
+def calcula_longitud_media(palabras, vector_probabilidades):
+    longitudMedia = 0
+    for i in range(len(palabras)):
+        longitudMedia += len(palabras[i]) * vector_probabilidades[i]
+    return round(longitudMedia, 3)
 
 def crea_archivo(nombre_archivo, N, vector_palabras_cifradas, vector_prob):
     with open(nombre_archivo, 'w', encoding='utf-8', errors='ignore') as arch:
@@ -53,24 +66,39 @@ def montecarlo(probabilidades, palabras):
         if r < acumulador:
             return palabras[i]  # Retorna la palabra seleccionada
 
-nombre_archivo = "tp2_sample0.txt"
-palabras, caracteres_unicos = almacenar_palabras_y_crear_abecedario_unico(nombre_archivo)
+nombre_archivo = "tp2_sample7.txt"
+palabras, caracteres_unicos = almacena_palabras_y_crea_abecedario_unico(nombre_archivo)
 print(palabras)
 print(caracteres_unicos)
 
-if inecuacionKraftMcMillan(len(caracteres_unicos), palabras):
+suma_kraft = inecuacion_KraftMcMillan(palabras, len(caracteres_unicos))
+print(f"K =  {suma_kraft}")
+
+if suma_kraft <= 1:
     print("Cumple la inecuación de Kraft-McMillan")
+
+    if codigo_instantaneo(palabras):
+        print("Es código instantáneo")
+
+    else:
+        print("No es código instantáneo")
+
+    if suma_kraft == 1:
+        vector_probabilidades = genera_vector_probabilidades(palabras, len(caracteres_unicos))
+        print("Las palabras sí podrían generar un código compacto, sus probabilidades deberían ser: ")
+        print(palabras)
+        print(vector_probabilidades)
+
+        entropia = calcula_entropia(vector_probabilidades, len(caracteres_unicos))
+        print(f"Entropía de la fuente: {entropia}")
+
+        longitud_media = calcula_longitud_media(palabras, vector_probabilidades)
+        print(f"Longitud media del código: {longitud_media}")
+    else:
+        print("No es posible que las palabras formen un código compacto")
 else:
     print("No cumple la inecuación de Kraft-McMillan")
 
-if codigoInstantaneo(palabras):
-    print("Es código instantáneo")
-    vectorProbabilidades = generaVectorProbabilidades(palabras, len(caracteres_unicos))
-    print("Las palabras sí pueden generar un código compacto, sus probabilidades serían: ")
-    print(palabras)
-    print(vectorProbabilidades)
-else:
-    print("No es código instantáneo")
 
 
 
