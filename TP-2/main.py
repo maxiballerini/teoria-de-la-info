@@ -1,10 +1,7 @@
 import sys
-import numpy as np
 import math
 import random
 import os
-from collections import Counter
-from itertools import product
 
 def almacena_palabras_y_crea_abecedario_unico(nombre_archivo):
     with open(nombre_archivo, 'r', encoding='utf-8', errors='ignore') as archivo:
@@ -43,10 +40,10 @@ def calcula_entropia(vector_probabilidades, base):
     return round(entropia, 3)
 
 def calcula_longitud_media(palabras, vector_probabilidades):
-    longitudMedia = 0
+    longitud_media = 0
     for i in range(len(palabras)):
-        longitudMedia += len(palabras[i]) * vector_probabilidades[i]
-    return round(longitudMedia, 3)
+        longitud_media += len(palabras[i]) * vector_probabilidades[i]
+    return round(longitud_media, 3)
 
 def crea_archivo(nombre_archivo, N, vector_palabras_cifradas, vector_prob):
     # Obtener el directorio donde se encuentra el script
@@ -73,39 +70,42 @@ def montecarlo(probabilidades, palabras):
         if r < acumulador:
             return palabras[i]  # Retorna la palabra seleccionada
 
-nombre_archivo = "tp2_sample0.txt"
-palabras, caracteres_unicos = almacena_palabras_y_crea_abecedario_unico(nombre_archivo)
-print(palabras)
-print(caracteres_unicos)
+if len(sys.argv) > 1:
+    nombre_archivo = sys.argv[1]
+    palabras, caracteres_unicos = almacena_palabras_y_crea_abecedario_unico(nombre_archivo)
+    print(palabras)
+    print(caracteres_unicos)
 
-suma_kraft = inecuacion_KraftMcMillan(palabras, len(caracteres_unicos))
-print(f"K =  {suma_kraft}")
+    suma_kraft = inecuacion_KraftMcMillan(palabras, len(caracteres_unicos))
+    print(f"K =  {suma_kraft}")
 
-if suma_kraft <= 1:
-    print("\nCumple la inecuación de Kraft-McMillan")
+    if suma_kraft <= 1:
+        print("\nCumple la inecuación de Kraft-McMillan")
 
-    if codigo_instantaneo(palabras):
-        print("\nEs código instantáneo")
+        if codigo_instantaneo(palabras):
+            print("\nEs código instantáneo")
 
+        else:
+            print("\nNo es código instantáneo")
+
+        if suma_kraft == 1:
+            vector_probabilidades = genera_vector_probabilidades(palabras, len(caracteres_unicos))
+            print("\nLas palabras sí podrían generar un código compacto, sus probabilidades deberían ser: ")
+            print(palabras)
+            print(vector_probabilidades)
+
+            entropia = calcula_entropia(vector_probabilidades, len(caracteres_unicos))
+            print(f"\nEntropía de la fuente: {entropia}")
+
+            longitud_media = calcula_longitud_media(palabras, vector_probabilidades)
+            print(f"\nLongitud media del código: {longitud_media}")
+
+            if len(sys.argv) > 3:
+                N = int(sys.argv[3])
+                crea_archivo("output.txt", N, palabras, vector_probabilidades)
+                print("\nArchivo de salida creado exitosamente")
+        else:
+            print("\nNo es posible que las palabras formen un código compacto")
     else:
-        print("\nNo es código instantáneo")
-
-    if suma_kraft == 1:
-        vector_probabilidades = genera_vector_probabilidades(palabras, len(caracteres_unicos))
-        print("\nLas palabras sí podrían generar un código compacto, sus probabilidades deberían ser: ")
-        print(palabras)
-        print(vector_probabilidades)
-
-        entropia = calcula_entropia(vector_probabilidades, len(caracteres_unicos))
-        print(f"\nEntropía de la fuente: {entropia}")
-
-        longitud_media = calcula_longitud_media(palabras, vector_probabilidades)
-        print(f"\nLongitud media del código: {longitud_media}")
-
-        #if len(sys.argv > 3)
-        crea_archivo("output.txt", 50, palabras, vector_probabilidades)# 50 ES EL N = ULTIMO SYSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-    else:
-        print("\nNo es posible que las palabras formen un código compacto")
-else:
-    print("\nNo cumple la inecuación de Kraft-McMillan")
+        print("\nNo cumple la inecuación de Kraft-McMillan")
 
