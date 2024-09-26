@@ -56,6 +56,8 @@ def crea_archivo(nombre_archivo, N, vector_palabras_cifradas, vector_prob):
         for i in range(N):
             palabra = montecarlo(vector_prob, vector_palabras_cifradas)
             arch.write(palabra)
+        print("\ne) Archivo de salida generado exitosamente")
+
 
 def montecarlo(probabilidades, palabras):
     # Generar un número aleatorio entre 0 y 1
@@ -73,14 +75,14 @@ def montecarlo(probabilidades, palabras):
 if len(sys.argv) > 1:
     nombre_archivo = sys.argv[1]
     palabras, caracteres_unicos = almacena_palabras_y_crea_abecedario_unico(nombre_archivo)
-    print(palabras)
-    print(caracteres_unicos)
+    print(f"\na) Conjunto de palabras: {palabras}")
+    print(f"\nCaracteres únicos: {caracteres_unicos}")
 
     suma_kraft = inecuacion_KraftMcMillan(palabras, len(caracteres_unicos))
-    print(f"K =  {suma_kraft}")
+    # print(f"K =  {suma_kraft}")
 
     if suma_kraft <= 1:
-        print("\nCumple la inecuación de Kraft-McMillan")
+        print("\nb) Cumple la inecuación de Kraft-McMillan")
 
         if codigo_instantaneo(palabras):
             print("\nEs código instantáneo")
@@ -90,22 +92,23 @@ if len(sys.argv) > 1:
 
         if suma_kraft == 1:
             vector_probabilidades = genera_vector_probabilidades(palabras, len(caracteres_unicos))
-            print("\nLas palabras sí podrían generar un código compacto, sus probabilidades deberían ser: ")
-            print(palabras)
+            print("\nc) Las palabras sí podrían generar un código compacto, sus probabilidades deberían ser: ")
             print(vector_probabilidades)
 
             entropia = calcula_entropia(vector_probabilidades, len(caracteres_unicos))
-            print(f"\nEntropía de la fuente: {entropia}")
+            print(f"\nd) Entropía de la fuente: {entropia}")
 
             longitud_media = calcula_longitud_media(palabras, vector_probabilidades)
             print(f"\nLongitud media del código: {longitud_media}")
-
             if len(sys.argv) > 3:
                 N = int(sys.argv[3])
                 crea_archivo("output.txt", N, palabras, vector_probabilidades)
-                print("\nArchivo de salida creado exitosamente")
         else:
-            print("\nNo es posible que las palabras formen un código compacto")
+            print("\nc) No es posible que las palabras formen un código compacto")
+            if len(sys.argv) > 3:
+                print("\ne) No es posible generar el archivo")
     else:
-        print("\nNo cumple la inecuación de Kraft-McMillan")
-
+        print("\nb) No cumple la inecuación de Kraft-McMillan")
+        print("\nc) No es posible que las palabras formen un código compacto")
+        if len(sys.argv) > 3:
+            print("\ne) No es posible generar el archivo")
