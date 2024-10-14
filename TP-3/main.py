@@ -21,13 +21,13 @@ def abrir_archivo(nombre_archivo):
 
 def obtener_probabilidades(contenido):
     #Función que obtiene las probabilidades de cada símbolo(byte), devuelve un diccionario (byte-probabilidad)
-    
-    total = len(contenido) + 1 # Se agrega uno por el caracter final de archivo
+
+    total = len(contenido)
     conteo_bytes = Counter(contenido) # Contador que tiene cada byte y cuantas veces aparece
     res = {}
     for byte_unico, frec in conteo_bytes.items():
         res[byte_unico] = float(frec) / total
-    res['end'] = 1.0/total
+    #res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
     return res
 
 # Obtener el directorio donde se encuentra el script
@@ -39,4 +39,6 @@ ruta_completa = os.path.join(directorio_actual, "facultad.png")
 # Leemos el archivo de entrada y lo almacenamos
 contenido_binario = abrir_archivo(ruta_completa)
 # Calculamos la distribución de probabilidades para cada símbolo
-probabilidades = obtener_probabilidades(contenido_binario))
+probabilidades = obtener_probabilidades(contenido_binario)
+
+print(probabilidades)
