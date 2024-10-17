@@ -59,36 +59,60 @@ def crear_diccionario(arbol):
     return diccionario_codigos
 
 def interpretar_bits(vector_bits, diccionario):
-    secuencia_caracteres = ""
-    temp_bits = "" 
+    secuencia_ascii = ""  # Cadena para almacenar la secuencia de caracteres ASCII resultante.
+    temp_bits = ""  # Cadena temporal para acumular los bits.
+
+    # Itera sobre cada bit en el vector de bits.
     for bit in vector_bits:
-        temp_bits += bit
-        if temp_bits in diccionario:
-            secuencia_caracteres += diccionario[temp_bits]
-            temp_bits = ""
+        temp_bits += bit  # Agrega el bit actual a la cadena temporal.
+        
+        # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
+        for clave, valor in diccionario.items():
+            if temp_bits == valor:  # Verifica si el valor del diccionario coincide con la cadena temporal.
+                secuencia_ascii += chr(clave)  # Convierte la clave (número) a su carácter ASCII.
+                temp_bits = ""  # Reinicia la cadena temporal.
+
+    return secuencia_ascii
+
+def converir_cadena(cadena_bits):
+    bytes_lista = []
+    longitud_original = len(cadena_bits)
     
-    return secuencia_caracteres
+    # Agrupa los bits en bytes
+    for i in range(0, longitud_original, 8):
+        byte_str = cadena_bits[i:i+8]  # Obtiene un grupo de 8 bits
+        if len(byte_str) < 8:
+            # Si el último grupo tiene menos de 8 bits, completa con ceros a la derecha
+            byte_str = byte_str.ljust(8, '0')
+        
+        # Convierte la cadena de bits a un entero
+        byte_val = int(byte_str, 2)  # Convierte de binario a entero
+        bytes_lista.append(byte_val)  # Añade el byte a la lista
+    return bytes_lista
 
 def comprimir(diccionario, contenido_binario,nombre_archivo):
     with open(nombre_archivo, 'wb') as archivo:
         vecaux = ""
         for valor in contenido_binario:
             vecaux += diccionario[valor]
-        print(len(contenido_binario))
-        print(len(vecaux))
-        print(vecaux)
-        #pickle.dump(diccionario, archivo)
-
+        longitud = len(vecaux)
+        archivo.write(longitud.to_bytes(4, 'big'))
+        pickle.dump(diccionario, archivo)
+        archivo.write(bytearray(converir_cadena(vecaux)))
+    
 
 
 def descomprimir(nombre_archivo_comprimido,nombre_archivo_descompimido):
     with open(nombre_archivo_comprimido, 'rb') as archivo:
-        # Recupera el diccionario desde el archivo
+        longitud_original = int.from_bytes(archivo.read(4), 'big')
         diccionario = pickle.load(archivo)
         contenido_descomprimido = archivo.read()
+        bits = ''.join(f'{byte:08b}' for byte in contenido_descomprimido)
+        bits_originales = bits[:longitud_original]
 
     with open(nombre_archivo_descompimido, 'w') as archivo:
-        archivo.write(interpretar_bits(contenido_descomprimido,diccionario))
+        aux =interpretar_bits(bits_originales,diccionario)
+        archivo.write(aux)
 
 
         
@@ -120,7 +144,7 @@ diccionario = crear_diccionario(arbol_Huffman)
 print("diccionario",diccionario,"\n")
 
 comprimir(diccionario, contenido_binario,"comprimido.dat")
-
+descomprimir("comprimido.dat","descomprimido.dat")
 #archivo_comprimido = comprimir(diccionario, contenido_binario)
 #tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
 
