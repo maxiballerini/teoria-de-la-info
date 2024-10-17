@@ -1,6 +1,7 @@
 import os
 import heapq
 from collections import Counter
+import pickle
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
@@ -57,16 +58,40 @@ def crear_diccionario(arbol):
     
     return diccionario_codigos
 
+def interpretar_bits(vector_bits, diccionario):
+    secuencia_caracteres = ""
+    temp_bits = "" 
+    for bit in vector_bits:
+        temp_bits += bit
+        if temp_bits in diccionario:
+            secuencia_caracteres += diccionario[temp_bits]
+            temp_bits = ""
+    
+    return secuencia_caracteres
 
-def comprimir(diccionario, contenido):
-    resultado = ""
-    for simbolo in contenido:
-        codigo = diccionario[simbolo]
-        resultado = resultado + codigo
-    # Agregamos el '1' al inicio para no perder los '0' que puede llegar a haber en la izquierda
-    resultado = '1' + resultado + diccionario['fin']
-    resultado = resultado + (len(resultado) % 8 * "0")
-    return int(resultado, 2) 
+def comprimir(diccionario, contenido_binario,nombre_archivo):
+    with open(nombre_archivo, 'wb') as archivo:
+        vecaux = ""
+        for valor in contenido_binario:
+            vecaux += diccionario[valor]
+        print(len(contenido_binario))
+        print(len(vecaux))
+        print(vecaux)
+        #pickle.dump(diccionario, archivo)
+
+
+
+def descomprimir(nombre_archivo_comprimido,nombre_archivo_descompimido):
+    with open(nombre_archivo_comprimido, 'rb') as archivo:
+        # Recupera el diccionario desde el archivo
+        diccionario = pickle.load(archivo)
+        contenido_descomprimido = archivo.read()
+
+    with open(nombre_archivo_descompimido, 'w') as archivo:
+        archivo.write(interpretar_bits(contenido_descomprimido,diccionario))
+
+
+        
 
 """
 def calcular_métricas(tamaño_original, tamaño_comprimido):
@@ -93,6 +118,8 @@ print("ARBOL:",arbol_Huffman,"\n")
 
 diccionario = crear_diccionario(arbol_Huffman)
 print("diccionario",diccionario,"\n")
+
+comprimir(diccionario, contenido_binario,"comprimido.dat")
 
 #archivo_comprimido = comprimir(diccionario, contenido_binario)
 #tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
