@@ -68,12 +68,13 @@ def comprimir(diccionario, contenido):
     resultado = resultado + (len(resultado) % 8 * "0")
     return int(resultado, 2) 
 
+"""
 def calcular_métricas(tamaño_original, tamaño_comprimido):
     tasa_compresion = tamaño_comprimido / tamaño_original
     rendimiento = math.log(tasa_compresion, 2)
     redundancia = 1 - rendimiento
     return tasa_compresion, rendimiento, redundancia
-
+"""
 
 # Obtener el directorio donde se encuentra el script
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
@@ -85,11 +86,14 @@ ruta_completa = os.path.join(directorio_actual, "prueba.txt")
 contenido_binario = abrir_archivo(ruta_completa)
 # Calculamos la distribución de probabilidades para cada símbolo
 probabilidades = obtener_probabilidades(contenido_binario)
-print(probabilidades)
+print("probabilidades: ",probabilidades,"\n")
 
 arbol_Huffman = obtener_arbol_Huffman(probabilidades)
-diccionario = crear_diccionario(arbol_Huffman)
-archivo_comprimido = comprimir(diccionario, contenido_binario)
-tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
+print("ARBOL:",arbol_Huffman,"\n")
 
+diccionario = crear_diccionario(arbol_Huffman)
+print("diccionario",diccionario,"\n")
+
+#archivo_comprimido = comprimir(diccionario, contenido_binario)
+#tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
 
