@@ -2,6 +2,7 @@ import os
 import heapq
 from collections import Counter
 import pickle
+import sys
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
@@ -125,26 +126,56 @@ def calcular_métricas(tamaño_original, tamaño_comprimido):
     return tasa_compresion, rendimiento, redundancia
 """
 
-# Obtener el directorio donde se encuentra el script
-directorio_actual = os.path.dirname(os.path.abspath(__file__))
+if len(sys.argv) == 4:
 
-# Combinar la ruta de la carpeta con el nombre del archivo
-#ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-# Leemos el archivo de entrada y lo almacenamos
-contenido_binario = abrir_archivo(ruta_completa)
-# Calculamos la distribución de probabilidades para cada símbolo
-probabilidades = obtener_probabilidades(contenido_binario)
-print("probabilidades: ",probabilidades,"\n")
+    #ESTO HAY  QUE CAMBIARLO , RTA COMPLETA DEBERIA SER EL ARGUMENTO "ORIGINAL"
 
-arbol_Huffman = obtener_arbol_Huffman(probabilidades)
-print("ARBOL:",arbol_Huffman,"\n")
+    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+    # Combinar la ruta de la carpeta con el nombre del archivo
+    #ruta_completa = os.path.join(directorio_actual, "prueba.txt")
+    ruta_completa = os.path.join(directorio_actual, "prueba.txt")
+    # Leemos el archivo de entrada y lo almacenamos
+    contenido_binario = abrir_archivo(ruta_completa)
 
-diccionario = crear_diccionario(arbol_Huffman)
-print("diccionario",diccionario,"\n")
 
-comprimir(diccionario, contenido_binario,"comprimido.dat")
-descomprimir("comprimido.dat","descomprimido.dat")
-#archivo_comprimido = comprimir(diccionario, contenido_binario)
-#tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
+
+    flag = sys.argv[1]
+    original = sys.argv[2]
+    compressed = sys.argv[3]
+    if flag == '-c':
+        contenido_binario = abrir_archivo(ruta_completa)
+        probabilidades = obtener_probabilidades(contenido_binario)
+        arbol_Huffman = obtener_arbol_Huffman(probabilidades)
+        diccionario = crear_diccionario(arbol_Huffman)
+        #COMPRIMIDO.DAT deberia ser el argumento compressed
+        comprimir(diccionario, contenido_binario,"comprimido.dat")
+    elif flag == '-d':
+        #lo mismo para los nombre de l0so archivos aca
+        descomprimir("comprimido.dat","descomprimido.dat")
+    else:
+        print("FLAG INCORRECTA")
+
+    
+    # Obtener el directorio donde se encuentra el script
+    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+
+    # Combinar la ruta de la carpeta con el nombre del archivo
+    #ruta_completa = os.path.join(directorio_actual, "prueba.txt")
+    ruta_completa = os.path.join(directorio_actual, "prueba.txt")
+    # Leemos el archivo de entrada y lo almacenamos
+    contenido_binario = abrir_archivo(ruta_completa)
+    # Calculamos la distribución de probabilidades para cada símbolo
+    probabilidades = obtener_probabilidades(contenido_binario)
+    print("probabilidades: ",probabilidades,"\n")
+
+    arbol_Huffman = obtener_arbol_Huffman(probabilidades)
+    print("ARBOL:",arbol_Huffman,"\n")
+
+    diccionario = crear_diccionario(arbol_Huffman)
+    print("diccionario",diccionario,"\n")
+
+    comprimir(diccionario, contenido_binario,"comprimido.dat")
+    descomprimir("comprimido.dat","descomprimido.dat")
+    #archivo_comprimido = comprimir(diccionario, contenido_binario)
+    #tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
 
