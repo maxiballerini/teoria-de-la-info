@@ -3,6 +3,7 @@ import heapq
 from collections import Counter
 import pickle
 import sys
+import time
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
@@ -126,6 +127,9 @@ def calcular_métricas(tamaño_original, tamaño_comprimido):
     return tasa_compresion, rendimiento, redundancia
 """
 
+
+
+"""
 if len(sys.argv) == 4:
 
     #ESTO HAY  QUE CAMBIARLO , RTA COMPLETA DEBERIA SER EL ARGUMENTO "ORIGINAL"
@@ -154,28 +158,33 @@ if len(sys.argv) == 4:
         descomprimir("comprimido.dat","descomprimido.dat")
     else:
         print("FLAG INCORRECTA")
+"""
 
-    
-    # Obtener el directorio donde se encuentra el script
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
+inicio = time.time() # inicio del tiempo
 
-    # Combinar la ruta de la carpeta con el nombre del archivo
-    #ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-    ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-    # Leemos el archivo de entrada y lo almacenamos
-    contenido_binario = abrir_archivo(ruta_completa)
-    # Calculamos la distribución de probabilidades para cada símbolo
-    probabilidades = obtener_probabilidades(contenido_binario)
-    print("probabilidades: ",probabilidades,"\n")
+# Obtener el directorio donde se encuentra el script
+directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
-    arbol_Huffman = obtener_arbol_Huffman(probabilidades)
-    print("ARBOL:",arbol_Huffman,"\n")
+# Combinar la ruta de la carpeta con el nombre del archivo
+ruta_completa = os.path.join(directorio_actual, "prueba.txt")
+#ruta_completa = os.path.join(directorio_actual, "facultad.png")
+# Leemos el archivo de entrada y lo almacenamos
+contenido_binario = abrir_archivo(ruta_completa)
+# Calculamos la distribución de probabilidades para cada símbolo
+probabilidades = obtener_probabilidades(contenido_binario)
+print("probabilidades: ",probabilidades,"\n")
 
-    diccionario = crear_diccionario(arbol_Huffman)
-    print("diccionario",diccionario,"\n")
+arbol_Huffman = obtener_arbol_Huffman(probabilidades)
+print("ARBOL:",arbol_Huffman,"\n")
 
-    comprimir(diccionario, contenido_binario,"comprimido.dat")
-    descomprimir("comprimido.dat","descomprimido.dat")
-    #archivo_comprimido = comprimir(diccionario, contenido_binario)
-    #tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
+diccionario = crear_diccionario(arbol_Huffman)
+print("diccionario",diccionario,"\n")
 
+comprimir(diccionario, contenido_binario,"comprimido.dat")
+descomprimir("comprimido.dat","descomprimido.dat")
+
+fin = time.time() # final de tiempo
+
+print(f"\nC)Tiempo de la accion solicitada: {fin - inicio:.4f} segundos")
+
+#tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
