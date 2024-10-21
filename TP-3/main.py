@@ -5,10 +5,6 @@ import pickle
 import sys
 import time
 import math
-<<<<<<< HEAD
-=======
-
->>>>>>> e1430bf787627b41b7e2c473e3920f40bf835d94
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
@@ -76,8 +72,9 @@ def interpretar_bits(vector_bits, diccionario):
         temp_bits += bit  # Agrega el bit actual a la cadena temporal.
         
         # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
-        if temp_bits in diccionario_invertido:  # Verifica si el valor del diccionario coincide con la cadena temporal.
-            secuencia_ascii += chr(diccionario_invertido[temp_bits])  # Convierte la clave (número) a su carácter ASCII.
+        if temp_bits in diccionario_invertido:
+            simbolo = diccionario_invertido[temp_bits]  # Verifica si el valor del diccionario coincide con la cadena temporal.
+            secuencia_ascii += simbolo # Convierte la clave (número) a su carácter ASCII.
             temp_bits = ""  # Reinicia la cadena temporal.
 
     return secuencia_ascii
@@ -149,6 +146,15 @@ def calcular_metricas(archivo_original, archivo_comprimido):
     print(f"Rendimiento: {rendimiento:.4f} bits por símbolo")
     print(f"Redundancia: {redundancia:.4f}")
 
+def imprimir_tabla_frecuencias(probabilidades, diccionario):
+    print("\nTabla de frecuencias:")
+    print("Símbolo\tFrecuencia\tCódigo")
+    for simbolo, probabilidad in probabilidades.items():
+        # Convertimos el símbolo a su representación de carácter (o byte)
+        simbolo_repr = simbolo if isinstance(simbolo, int) else chr(simbolo)
+        codigo = diccionario[simbolo]
+        print(f"{simbolo_repr}\t{probabilidad:.4f}\t\t{codigo}")
+    print("\n")
 
 if len(sys.argv) != 4:
     print("Uso: tpi3 {-c|-d} original compressed")
@@ -169,12 +175,13 @@ if flag == '-c':
     fin = time.time()  # final de tiempo
     print(f"\nTiempo de la acción solicitada: {fin - inicio:.4f} segundos")
     calcular_metricas(original, compressed)
+    # Activar esta función para ver la tabla de frecuencia de cada símbolo con su código
+    #imprimir_tabla_frecuencias(probabilidades, diccionario) 
 
 elif flag == '-d':
     descomprimir(compressed, original)
     fin = time.time()  # final de tiempo
     print(f"\nTiempo de la acción solicitada: {fin - inicio:.4f} segundos")
-    calcular_metricas(original, compressed)
 
 else:
     print("FLAG INCORRECTA")
