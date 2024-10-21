@@ -4,6 +4,8 @@ from collections import Counter
 import pickle
 import sys
 import time
+import math
+
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
