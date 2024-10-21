@@ -5,6 +5,10 @@ import pickle
 import sys
 import time
 import math
+<<<<<<< HEAD
+=======
+
+>>>>>>> e1430bf787627b41b7e2c473e3920f40bf835d94
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
@@ -141,7 +145,7 @@ def calcular_metricas(archivo_original, archivo_comprimido):
     redundancia = 1 - (rendimiento / log_k)
 
     # Mostrar resultados
-    print(f"Tasa de compresión: {tasa_compresion:.4f}")
+    print(f"D)Tasa de compresión: {tasa_compresion:.4f}")
     print(f"Rendimiento: {rendimiento:.4f} bits por símbolo")
     print(f"Redundancia: {redundancia:.4f}")
 
