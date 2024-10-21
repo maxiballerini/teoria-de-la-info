@@ -4,6 +4,7 @@ from collections import Counter
 import pickle
 import sys
 import time
+import math
 
 def abrir_archivo(nombre_archivo):
     # Abriendo un archivo de imagen en modo binario
@@ -61,6 +62,8 @@ def crear_diccionario(arbol):
     return diccionario_codigos
 
 def interpretar_bits(vector_bits, diccionario):
+
+    diccionario_invertido = {v: k for k, v in diccionario.items()}
     secuencia_ascii = ""  # Cadena para almacenar la secuencia de caracteres ASCII resultante.
     temp_bits = ""  # Cadena temporal para acumular los bits.
 
@@ -69,14 +72,13 @@ def interpretar_bits(vector_bits, diccionario):
         temp_bits += bit  # Agrega el bit actual a la cadena temporal.
         
         # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
-        for clave, valor in diccionario.items():
-            if temp_bits == valor:  # Verifica si el valor del diccionario coincide con la cadena temporal.
-                secuencia_ascii += chr(clave)  # Convierte la clave (número) a su carácter ASCII.
-                temp_bits = ""  # Reinicia la cadena temporal.
+        if temp_bits in diccionario_invertido:  # Verifica si el valor del diccionario coincide con la cadena temporal.
+            secuencia_ascii += chr(diccionario_invertido[temp_bits])  # Convierte la clave (número) a su carácter ASCII.
+            temp_bits = ""  # Reinicia la cadena temporal.
 
     return secuencia_ascii
 
-def converir_cadena(cadena_bits):
+def convertir_cadena(cadena_bits):
     bytes_lista = []
     longitud_original = len(cadena_bits)
     
@@ -97,14 +99,15 @@ def comprimir(diccionario, contenido_binario,nombre_archivo):
         vecaux = ""
         for valor in contenido_binario:
             vecaux += diccionario[valor]
+            
         longitud = len(vecaux)
         archivo.write(longitud.to_bytes(4, 'big'))
         pickle.dump(diccionario, archivo)
-        archivo.write(bytearray(converir_cadena(vecaux)))
+        archivo.write(bytearray(convertir_cadena(vecaux)))
     
 
 
-def descomprimir(nombre_archivo_comprimido,nombre_archivo_descompimido):
+def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
     with open(nombre_archivo_comprimido, 'rb') as archivo:
         longitud_original = int.from_bytes(archivo.read(4), 'big')
         diccionario = pickle.load(archivo)
@@ -112,9 +115,9 @@ def descomprimir(nombre_archivo_comprimido,nombre_archivo_descompimido):
         bits = ''.join(f'{byte:08b}' for byte in contenido_descomprimido)
         bits_originales = bits[:longitud_original]
 
-    with open(nombre_archivo_descompimido, 'w') as archivo:
-        aux =interpretar_bits(bits_originales,diccionario)
-        archivo.write(aux)
+    with open(nombre_archivo_descomprimido, 'wb') as archivo:
+        aux = interpretar_bits(bits_originales, diccionario)
+        archivo.write(aux.encode('utf-8'))
 
 def calcular_metricas(archivo_original, archivo_comprimido):
     # Obtener el tamaño de los archivos en bytes
@@ -133,7 +136,7 @@ def calcular_metricas(archivo_original, archivo_comprimido):
     rendimiento = (tamaño_comprimido * 8) / n  # En bits por símbolo
 
     # Calcular la redundancia
-    k = 256  # Posibles símbolos (ASCII)
+    k = len(set(contenido)) 
     log_k = math.log2(k)
     redundancia = 1 - (rendimiento / log_k)
 
@@ -173,7 +176,7 @@ if len(sys.argv) == 4:
         descomprimir("comprimido.dat","descomprimido.dat")
     else:
         print("FLAG INCORRECTA")
-"""
+
 
 inicio = time.time() # inicio del tiempo
 
@@ -181,8 +184,7 @@ inicio = time.time() # inicio del tiempo
 directorio_actual = os.path.dirname(os.path.abspath(__file__))
 
 # Combinar la ruta de la carpeta con el nombre del archivo
-ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-#ruta_completa = os.path.join(directorio_actual, "facultad.png")
+ruta_completa = os.path.join(directorio_actual, "imagen.raw")
 # Leemos el archivo de entrada y lo almacenamos
 contenido_binario = abrir_archivo(ruta_completa)
 # Calculamos la distribución de probabilidades para cada símbolo
@@ -202,4 +204,34 @@ fin = time.time() # final de tiempo
 
 print(f"\nC)Tiempo de la accion solicitada: {fin - inicio:.4f} segundos")
 
-calcular_metricas("prueba.txt","comprimido.dat")
+calcular_metricas("descomprimido.dat","comprimido.dat")
+"""
+
+if len(sys.argv) != 4:
+    print("Uso: tpi3 {-c|-d} original compressed")
+    sys.exit(1)
+
+flag = sys.argv[1]
+original = sys.argv[2]
+compressed = sys.argv[3]
+
+inicio = time.time()  # inicio del tiempo
+
+if flag == '-c':
+    contenido_binario = abrir_archivo(original)
+    probabilidades = obtener_probabilidades(contenido_binario)
+    arbol_Huffman = obtener_arbol_Huffman(probabilidades)
+    diccionario = crear_diccionario(arbol_Huffman)
+    comprimir(diccionario, contenido_binario, compressed)
+    fin = time.time()  # final de tiempo
+    print(f"\nTiempo de la acción solicitada: {fin - inicio:.4f} segundos")
+    calcular_metricas(original, compressed)
+
+elif flag == '-d':
+    descomprimir(compressed, original)
+    fin = time.time()  # final de tiempo
+    print(f"\nTiempo de la acción solicitada: {fin - inicio:.4f} segundos")
+    calcular_metricas(original, compressed)
+
+else:
+    print("FLAG INCORRECTA")
