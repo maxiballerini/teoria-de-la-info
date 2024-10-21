@@ -150,67 +150,6 @@ def calcular_metricas(archivo_original, archivo_comprimido):
     print(f"Redundancia: {redundancia:.4f}")
 
 
-
-"""
-if len(sys.argv) == 4:
-
-    #ESTO HAY  QUE CAMBIARLO , RTA COMPLETA DEBERIA SER EL ARGUMENTO "ORIGINAL"
-
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
-    # Combinar la ruta de la carpeta con el nombre del archivo
-    #ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-    ruta_completa = os.path.join(directorio_actual, "prueba.txt")
-    # Leemos el archivo de entrada y lo almacenamos
-    contenido_binario = abrir_archivo(ruta_completa)
-
-
-
-    flag = sys.argv[1]
-    original = sys.argv[2]
-    compressed = sys.argv[3]
-    if flag == '-c':
-        contenido_binario = abrir_archivo(ruta_completa)
-        probabilidades = obtener_probabilidades(contenido_binario)
-        arbol_Huffman = obtener_arbol_Huffman(probabilidades)
-        diccionario = crear_diccionario(arbol_Huffman)
-        #COMPRIMIDO.DAT deberia ser el argumento compressed
-        comprimir(diccionario, contenido_binario,"comprimido.dat")
-    elif flag == '-d':
-        #lo mismo para los nombre de l0so archivos aca
-        descomprimir("comprimido.dat","descomprimido.dat")
-    else:
-        print("FLAG INCORRECTA")
-
-
-inicio = time.time() # inicio del tiempo
-
-# Obtener el directorio donde se encuentra el script
-directorio_actual = os.path.dirname(os.path.abspath(__file__))
-
-# Combinar la ruta de la carpeta con el nombre del archivo
-ruta_completa = os.path.join(directorio_actual, "imagen.raw")
-# Leemos el archivo de entrada y lo almacenamos
-contenido_binario = abrir_archivo(ruta_completa)
-# Calculamos la distribución de probabilidades para cada símbolo
-probabilidades = obtener_probabilidades(contenido_binario)
-print("probabilidades: ",probabilidades,"\n")
-
-arbol_Huffman = obtener_arbol_Huffman(probabilidades)
-print("ARBOL:",arbol_Huffman,"\n")
-
-diccionario = crear_diccionario(arbol_Huffman)
-print("diccionario",diccionario,"\n")
-
-comprimir(diccionario, contenido_binario,"comprimido.dat")
-descomprimir("comprimido.dat","descomprimido.dat")
-
-fin = time.time() # final de tiempo 
-
-print(f"\nC)Tiempo de la accion solicitada: {fin - inicio:.4f} segundos")
-
-calcular_metricas("descomprimido.dat","comprimido.dat")
-"""
-
 if len(sys.argv) != 4:
     print("Uso: tpi3 {-c|-d} original compressed")
     sys.exit(1)
