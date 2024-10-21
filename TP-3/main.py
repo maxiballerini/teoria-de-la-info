@@ -140,7 +140,7 @@ def calcular_metricas(archivo_original, archivo_comprimido):
     redundancia = 1 - (rendimiento / log_k)
 
     # Mostrar resultados
-    print(f"Tasa de compresión: {tasa_compresion:.4f}")
+    print(f"D)Tasa de compresión: {tasa_compresion:.4f}")
     print(f"Rendimiento: {rendimiento:.4f} bits por símbolo")
     print(f"Redundancia: {redundancia:.4f}")
 
