@@ -116,16 +116,31 @@ def descomprimir(nombre_archivo_comprimido,nombre_archivo_descompimido):
         aux =interpretar_bits(bits_originales,diccionario)
         archivo.write(aux)
 
+def calcular_metricas(archivo_original, archivo_comprimido):
+    # Obtener el tamaño de los archivos en bytes
+    tamaño_original = os.path.getsize(archivo_original)
+    tamaño_comprimido = os.path.getsize(archivo_comprimido)
 
-        
-
-"""
-def calcular_métricas(tamaño_original, tamaño_comprimido):
+    # Calcular la tasa de compresión (TC)
     tasa_compresion = tamaño_comprimido / tamaño_original
-    rendimiento = math.log(tasa_compresion, 2)
-    redundancia = 1 - rendimiento
-    return tasa_compresion, rendimiento, redundancia
-"""
+
+    # Contar el número de símbolos en el archivo original
+    with open(archivo_original, 'rb') as f:
+        contenido = f.read()
+        n = len(contenido)  # Número de símbolos (caracteres)
+
+    # Calcular el rendimiento (R)
+    rendimiento = (tamaño_comprimido * 8) / n  # En bits por símbolo
+
+    # Calcular la redundancia
+    k = 256  # Posibles símbolos (ASCII)
+    log_k = math.log2(k)
+    redundancia = 1 - (rendimiento / log_k)
+
+    # Mostrar resultados
+    print(f"Tasa de compresión: {tasa_compresion:.4f}")
+    print(f"Rendimiento: {rendimiento:.4f} bits por símbolo")
+    print(f"Redundancia: {redundancia:.4f}")
 
 
 
@@ -183,8 +198,8 @@ print("diccionario",diccionario,"\n")
 comprimir(diccionario, contenido_binario,"comprimido.dat")
 descomprimir("comprimido.dat","descomprimido.dat")
 
-fin = time.time() # final de tiempo
+fin = time.time() # final de tiempo 
 
 print(f"\nC)Tiempo de la accion solicitada: {fin - inicio:.4f} segundos")
 
-#tasa, rendimiento, redundancia = calcular_métricas(tamaño_original, tamaño_comprimido) #fala crear el tamorig y tamcompr
+calcular_metricas("prueba.txt","comprimido.dat")
