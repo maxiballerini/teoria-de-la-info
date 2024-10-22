@@ -74,7 +74,7 @@ def interpretar_bits(vector_bits, diccionario):
         # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
         if temp_bits in diccionario_invertido:
             simbolo = diccionario_invertido[temp_bits]  # Verifica si el valor del diccionario coincide con la cadena temporal.
-            secuencia_ascii += simbolo # Convierte la clave (número) a su carácter ASCII.
+            secuencia_ascii += chr(simbolo) # Convierte la clave (número) a su carácter ASCII.
             temp_bits = ""  # Reinicia la cadena temporal.
 
     return secuencia_ascii
@@ -173,7 +173,7 @@ if flag == '-c':
     diccionario = crear_diccionario(arbol_Huffman)
     comprimir(diccionario, contenido_binario, compressed)
     fin = time.time()  # final de tiempo
-    print(f"\nTiempo de la acción solicitada: {fin - inicio:.4f} segundos")
+    print(f"\nTiempo de compresión solicitada: {fin - inicio:.4f} segundos")
     calcular_metricas(original, compressed)
     # Activar esta función para ver la tabla de frecuencia de cada símbolo con su código
     #imprimir_tabla_frecuencias(probabilidades, diccionario) 
@@ -181,7 +181,7 @@ if flag == '-c':
 elif flag == '-d':
     descomprimir(compressed, original)
     fin = time.time()  # final de tiempo
-    print(f"\nTiempo de la acción solicitada: {fin - inicio:.4f} segundos")
+    print(f"\nTiempo de descompresión solicitada: {fin - inicio:.4f} segundos")
 
 else:
     print("FLAG INCORRECTA")
