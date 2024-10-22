@@ -102,7 +102,8 @@ def comprimir(diccionario, contenido_binario,nombre_archivo):
             vecaux += diccionario[valor]
             
         longitud = len(vecaux)
-        #se guarda un int (4 bytes) que indica la longitud de la cadena comprimida para luego recortarla ya que podria pasar que cuando se convierte la cadena de bits a bytes esta se auntocomplete en el ultimo byte con 0
+        #se guarda un int (4 bytes) que indica la longitud de la cadena comprimida para luego recortarla ya que
+        #podria pasar que cuando se convierte la cadena de bits a bytes esta se auntocomplete en el ultimo byte con 0
         archivo.write(longitud.to_bytes(4, 'big'))
         #se usa la libreria pickle donde "pickle.dump" es una fucnion encargada de alamcenar un diccionario en un archivo
         pickle.dump(diccionario, archivo)
