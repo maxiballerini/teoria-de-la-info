@@ -102,7 +102,9 @@ def comprimir(diccionario, contenido_binario,nombre_archivo):
             vecaux += diccionario[valor]
             
         longitud = len(vecaux)
+        #se guarda un int (4 bytes) que indica la longitud de la cadena comprimida para luego recortarla ya que podria pasar que cuando se convierte la cadena de bits a bytes esta se auntocomplete en el ultimo byte con 0
         archivo.write(longitud.to_bytes(4, 'big'))
+        #se usa la libreria pickle donde "pickle.dump" es una fucnion encargada de alamcenar un diccionario en un archivo
         pickle.dump(diccionario, archivo)
         archivo.write(bytearray(convertir_cadena(vecaux)))
     
@@ -110,10 +112,14 @@ def comprimir(diccionario, contenido_binario,nombre_archivo):
 
 def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
     with open(nombre_archivo_comprimido, 'rb') as archivo:
+        #se leen los primeros 4 bytes para indetificar la longitud de la cadena original de bits a descomprimir
         longitud_original = int.from_bytes(archivo.read(4), 'big')
+        #se recupera el diccionario
         diccionario = pickle.load(archivo)
         contenido_descomprimido = archivo.read()
+        # Se convierte cada byte del contenido leído en una representación binaria de 8 bits
         bits = ''.join(f'{byte:08b}' for byte in contenido_descomprimido)
+        #se acorta la cadena a su longitud original
         bits_originales = bits[:longitud_original]
 
     with open(nombre_archivo_descomprimido, 'wb') as archivo:
