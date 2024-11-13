@@ -75,6 +75,33 @@ def leer_arch_y_agrega_paridad(archivo, N):
     
     return matrices
 
+def convertir_a_bits(contenido):
+    # Convertir el contenido binario a una lista de bits
+    bits = []
+    for byte in contenido:
+        # Convertir cada byte a su representación binaria de 8 bits
+        bits.extend([int(bit) for bit in f'{byte:08b}'])
+    return bits
+
+def calcular_matriz_probabilidad(bits_transmitidos, bits_recibidos):
+    # Inicializar la matriz de probabilidades (2x2)
+    matriz_probabilidad = np.zeros((2, 2))
+    
+    # Asegúrate de que las secuencias de bits sean de la misma longitud
+    assert len(bits_transmitidos) == len(bits_recibidos), "Las secuencias deben ser del mismo tamaño."
+    
+    # Contar las transiciones
+    for bit_transmitido, bit_recibido in zip(bits_transmitidos, bits_recibidos):
+        matriz_probabilidad[bit_transmitido][bit_recibido] += 1
+    
+    # Normalizar las filas para obtener las probabilidades
+    for i in range(2):
+        suma_fila = np.sum(matriz_probabilidad[i])
+        if suma_fila > 0:
+            matriz_probabilidad[i] /= suma_fila
+    
+    return matriz_probabilidad
+
 ruta_archivo = "C:/teoria-de-la-info/TP-4/tp4_samples/tp4_sample0_sent.bin"
 contenido_binario = leer_archivo(ruta_archivo)
 caracteres_unicos = obtener_caracteres_unicos(contenido_binario)
@@ -83,3 +110,7 @@ entropia = calcular_entropia(vector_probabilidades)
 aux = leer_arch_y_agrega_paridad(ruta_archivo,4)
 print(aux[0])
 print(f"a)Entropía: {entropia:.6f} binits")
+ruta_archivo = "C:/teoria-de-la-info/TP-4/tp4_samples/tp4_sample0_recv1.bin"
+contenido_binario_recibido = leer_archivo(ruta_archivo)
+contenido_bits_recibido = convertir_a_bits(contenido_binario_recibido)
+#matriz_probabilidades_C = calcular_matriz_probabilidad(contenido_binario_enviado,contenido_binario_recibido)
