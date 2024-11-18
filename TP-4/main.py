@@ -33,6 +33,21 @@ def calcular_entropia(vec_probabilidades):
 
     return suma
 
+def bits_a_vector_de_matrices(bits_recived, N):
+
+    total_bits = len(bits_recived)
+    bits_por_matriz = N * N
+    # Convertir la cadena de bits a una lista de enteros (0 o 1)
+    bits = [int(b) for b in bits_recived]
+
+    #Crear las matrices N x N y almacenarlas en un vector
+    vector_de_matrices_recived = []
+    for i in range(0, total_bits, bits_por_matriz):
+        matriz = np.array(bits[i:i + bits_por_matriz]).reshape(N, N)
+        vector_de_matrices_recived.append(matriz)
+
+    return vector_de_matrices_recived
+
 def genera_matrices_paridad(contenido, N):
     matrices = []  # Lista para almacenar las matrices generadas
     matriz_datos = np.zeros((N, N), dtype=int)  # Inicializar la matriz de ceros con una fila y columna extra
@@ -109,11 +124,13 @@ else:
     print(caracteres_unicos)
     vector_probabilidades = calcular_probabilidades(contenido_binario_enviado, caracteres_unicos)
     entropia = calcular_entropia(vector_probabilidades)
-    matrices = genera_matrices_paridad(contenido_binario_enviado, N) # Las matrices generadas tienen los bits de paridad en las fila N+1 y columna N+1
-    # Sacar el comentario para ver como queda una matriz
-    print(matrices[0]) 
-    print(f"a)Entropía: {entropia:.6f} binits")
+    matrices = genera_matrices_paridad(contenido_binario_enviado, N) 
     contenido_binario_recibido = leer_archivo(archivo_received)
+    matrices_received = bits_a_vector_de_matrices(contenido_binario_recibido, 2)
+    # Sacar el comentario para ver como queda una matriz
+    print(len(matrices))
+    print(len(matrices_received))
+    print(f"a)Entropía: {entropia:.6f} binits")
     # contenido_bits_recibido = convertir_a_bits(contenido_binario_recibido)
     # matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
     # print(matriz_probabilidades)
