@@ -127,7 +127,47 @@ def extraer_bits_matrices(matrices_received, N):
                 for i in range(N - 1):  # Recorrer filas
                     contenido_bits_recibido.append(matriz[i, j])
                     
-    return contenido_bits_recibido   
+    return contenido_bits_recibido
+
+def verificar_mensajes(array_matrices1, array_matrices2):
+    def obtener_bits_paridad(matriz):
+        N = matriz.shape[0] - 1  # Tamaño real de la matriz sin la fila y columna de paridad
+        # Obtener bits de paridad
+        paridad_lrc = matriz[N, :-1]  # Última fila sin el bit de paridad cruzada
+        paridad_vrc = matriz[:-1, N]  # Última columna sin el bit de paridad cruzada
+        paridad_cruzada = matriz[N, N]  # Bit de paridad cruzada
+        return paridad_lrc, paridad_vrc, paridad_cruzada
+
+    # Contadores de resultados
+    correctos = 0
+    corregibles = 0
+    erroneos = 0
+
+    # Iterar sobre los pares de matrices
+    for matriz1, matriz2 in zip(array_matrices1, array_matrices2):
+        # Obtener los bits de paridad de ambas matrices
+        lrc1, vrc1, cruzada1 = obtener_bits_paridad(matriz1)
+        lrc2, vrc2, cruzada2 = obtener_bits_paridad(matriz2)
+
+        # Comparar bits de paridad
+        errores = 0
+        if not np.array_equal(lrc1, lrc2):
+            errores += 1
+        if not np.array_equal(vrc1, vrc2):
+            errores += 1
+        if cruzada1 != cruzada2:
+            errores += 1
+
+        # Determinar el estado del mensaje
+        if errores == 0:
+            correctos += 1
+        elif errores == 1 or (errores == 2 and cruzada1 != cruzada2):
+            corregibles += 1
+        else:
+            erroneos += 1
+
+    # Retornar los conteos
+    return correctos, corregibles, erroneos   
 
 if len(sys.argv) != 4:
     print("Uso: python tpi4.py <sent> <received> <N>")
@@ -147,5 +187,9 @@ else:
 
     contenido_bits_recibido = extraer_bits_matrices(matrices_received,N+1)
     print(len(contenido_bits_recibido))
-    matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
+    # matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
     # print(matriz_probabilidades)
+    mensajes_correctos, mensajes_erroneos, mensajes_corregibles = verificar_mensajes(matrices, matrices_received)
+    print(f"Cantidad de enviados correctamente: {mensajes_correctos}")
+    print(f"Cantidad de mensajes erróneos: {mensajes_erroneos}")
+    print(f"Cantidad de mensajes corregidos: {mensajes_corregibles}")
