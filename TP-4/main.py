@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import math
 from collections import Counter
 from itertools import product
 
@@ -167,10 +168,31 @@ def verificar_mensajes(array_matrices1, array_matrices2):
             erroneos += 1
 
     # Retornar los conteos
-    return correctos, corregibles, erroneos   
+    return correctos, corregibles, erroneos
+
+def calcular_entropias_a_priori(probs, N):
+    entropia = 0
+    for i in range(N):
+        for p in probs:
+            if p > 0:  # Evitar logaritmo de 0
+                entropia +=p * (math.log2(1 / p))  # Fórmula de entropía
+    return entropia
+
+def calcular_entropias_a_posteriori(matriz_probs, N):
+    entropias = []  # Lista para almacenar las entropías a posteriori de cada conjunto
+
+    for j in range(len(matriz_probs[0])):  # Para cada símbolo de salida bj
+        entropia = 0
+        for i in range(N):  # Para cada símbolo de entrada ai
+            prob = matriz_probs[i][j]
+            if prob > 0:  # Evitar logaritmo de 0
+                entropia -= prob * math.log2(prob)  # Fórmula de entropía
+        entropias.append(entropia)  # Añadir la entropía calculada para este conjunto
+
+    return entropias   
 
 if len(sys.argv) != 4:
-    print("Uso: python tpi4.py <sent> <received> <N>")
+    print("Uso: python main.py <sent> <received> <N>")
 else:
     # Guardo los parametros
     archivo_sent = sys.argv[1]
@@ -180,6 +202,7 @@ else:
     contenido_binario_enviado = leer_archivo(archivo_sent)
     caracteres_unicos = obtener_caracteres_unicos(contenido_binario_enviado)
     vector_probabilidades = calcular_probabilidades(contenido_binario_enviado, caracteres_unicos)
+    print(vector_probabilidades)
     entropia = calcular_entropia(vector_probabilidades)
     print(f"a)Entropía: {entropia:.6f} binits")
 
@@ -188,8 +211,6 @@ else:
     matrices_received = bits_a_vector_de_matrices(contenido_binario_recibido, N + 1)
 
     contenido_bits_recibido = extraer_bits_matrices(matrices_received, N + 1)
-    print(len(contenido_binario_enviado))
-    print(len(contenido_bits_recibido))
     matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_bits_recibido)
     print(f"c) {matriz_probabilidades}")
 
@@ -197,4 +218,9 @@ else:
     print(f"d) Cantidad de enviados correctamente: {mensajes_correctos}")
     print(f"Cantidad de mensajes erróneos: {mensajes_erroneos}")
     print(f"Cantidad de mensajes corregidos: {mensajes_corregibles}")
+
+    entropia_a_priori = calcular_entropias_a_priori(vector_probabilidades, N)
+    entropias_posteriori = calcular_entropias_a_posteriori(matriz_probabilidades, N)
+    print(f"Entropía a priori: {entropia_a_priori:.6f} binits")
+    print(f"Entropías a posteriori: H(0) = {entropias_posteriori[0]:.6f} binits , H(1) = {entropias_posteriori[1]:.6f} binits")
 
