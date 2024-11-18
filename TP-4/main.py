@@ -4,27 +4,28 @@ from collections import Counter
 from itertools import product
 
 def leer_archivo(nombre_archivo):
-    # Abrir el archivo en modo lectura
+    # Abrir el archivo en modo lectura binaria
     with open(nombre_archivo, 'rb') as archivo:
         # Leer el contenido del archivo
-        contenido = archivo.read()  
-        # Agregar cada carácter del contenido a la lista
-    return contenido
-
+        contenido = archivo.read()
+        
+    # Convertir el contenido en bits (1s y 0s)
+    bits = ''.join(format(byte, '08b') for byte in contenido)
+    
+    return bits
 
 def obtener_caracteres_unicos(contenido):
-    # Obtiene una lista de caracteres únicos en el contenido
+    # Obtiene una lista de caracteres únicos en el contenido (en este caso, los bits únicos)
     return list(set(contenido))
 
 def calcular_probabilidades(contenido, caracteres_unicos):
-    # Cuenta las ocurrencias de cada byte en el contenido
+    # Cuenta las ocurrencias de cada bit (1 o 0)
     conteo_total = len(contenido)
     contador = Counter(contenido)
     
-    # Calcula la probabilidad de cada carácter único
+    # Calcula la probabilidad de cada bit único (1 o 0)
     probabilidades = [contador[caracter] / conteo_total for caracter in caracteres_unicos]
     return probabilidades
-
 def calcular_entropia(vec_probabilidades):
     suma = 0
     for i in range(len(vec_probabilidades)):
@@ -37,27 +38,26 @@ def genera_matrices_paridad(contenido, N):
     matriz_datos = np.zeros((N, N), dtype=int)  # Inicializar la matriz de ceros con una fila y columna extra
     bit_index = 0  # Índice para rastrear la posición del bit en la matriz actual
     
-    for byte in contenido:
-        for bit in f'{byte:08b}':
-            columna = bit_index // N  # Determina la columna por el índice
-            fila = bit_index % N  # Determina la fila dentro de la columna
-            matriz_datos[fila, columna] = int(bit)  # Coloca el bit en la matriz
-            bit_index += 1
+    for bit in contenido:
+        columna = bit_index // N  # Determina la columna por el índice
+        fila = bit_index % N  # Determina la fila dentro de la columna
+        matriz_datos[fila, columna] = int(bit)  # Coloca el bit en la matriz
+        bit_index += 1
+        
+        # Si completamos una matriz N x N, la agregamos a la lista y reiniciamos
+        if bit_index >= N * N:
+
+            matriz_paridad = np.zeros((N + 1, N + 1), dtype=int) # Crear matriz extendida
+            matriz_paridad[:N, :N] = matriz_datos # Copiar datos a la matriz extendida
+
+            for i in range(N):
+                matriz_paridad[i, N] = matriz_datos[:, i].sum() % 2 # Calculo de VRC
+                matriz_paridad[N, i] = matriz_datos[i, :].sum() % 2 # Calculo de LRC
+            matriz_paridad[N, N] = matriz_datos.sum() % 2 # Calculo de paridad cruzada que comprueba paridades
             
-            # Si completamos una matriz N x N, la agregamos a la lista y reiniciamos
-            if bit_index >= N * N:
-
-                matriz_paridad = np.zeros((N + 1, N + 1), dtype=int) # Crear matriz extendida
-                matriz_paridad[:N, :N] = matriz_datos # Copiar datos a la matriz extendida
-
-                for i in range(N):
-                    matriz_paridad[i, N] = matriz_datos[:, i].sum() % 2 # Calculo de VRC
-                    matriz_paridad[N, i] = matriz_datos[i, :].sum() % 2 # Calculo de LRC
-                matriz_paridad[N, N] = matriz_datos.sum() % 2 # Calculo de paridad cruzada que comprueba paridades
-                
-                matrices.append(matriz_paridad)
-                matriz_datos = np.zeros((N, N), dtype=int)  # Nueva matriz vacía
-                bit_index = 0  # Reiniciar el índice de bits para la nueva matriz
+            matrices.append(matriz_paridad)
+            matriz_datos = np.zeros((N, N), dtype=int)  # Nueva matriz vacía
+            bit_index = 0  # Reiniciar el índice de bits para la nueva matriz
     
     # Si hay una matriz incompleta (no llena pero con algunos bits), agregarla
     if bit_index > 0:
@@ -106,13 +106,14 @@ else:
     N = int(sys.argv[3])
     contenido_binario_enviado = leer_archivo(archivo_sent)
     caracteres_unicos = obtener_caracteres_unicos(contenido_binario_enviado)
+    print(caracteres_unicos)
     vector_probabilidades = calcular_probabilidades(contenido_binario_enviado, caracteres_unicos)
     entropia = calcular_entropia(vector_probabilidades)
     matrices = genera_matrices_paridad(contenido_binario_enviado, N) # Las matrices generadas tienen los bits de paridad en las fila N+1 y columna N+1
     # Sacar el comentario para ver como queda una matriz
-    # print(matrices[0]) 
+    print(matrices[0]) 
     print(f"a)Entropía: {entropia:.6f} binits")
     contenido_binario_recibido = leer_archivo(archivo_received)
-    contenido_bits_recibido = convertir_a_bits(contenido_binario_recibido)
+    # contenido_bits_recibido = convertir_a_bits(contenido_binario_recibido)
     # matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
     # print(matriz_probabilidades)
