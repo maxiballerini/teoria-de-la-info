@@ -104,7 +104,7 @@ def calcular_matriz_probabilidad(bits_transmitidos, bits_recibidos):
     
     # Contar las transiciones
     for bit_transmitido, bit_recibido in zip(bits_transmitidos, bits_recibidos):
-        matriz_probabilidad[bit_transmitido][bit_recibido] += 1
+        matriz_probabilidad[int(bit_transmitido)][int(bit_recibido)] += 1
     
     # Normalizar las filas para obtener las probabilidades
     for i in range(2):
@@ -186,6 +186,7 @@ else:
     print(f"a)Entropía: {entropia:.6f} binits")
 
     contenido_bits_recibido = extraer_bits_matrices(matrices_received,N+1)
+<<<<<<< HEAD
     print(len(contenido_bits_recibido))
     # matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
     # print(matriz_probabilidades)
@@ -193,3 +194,8 @@ else:
     print(f"Cantidad de enviados correctamente: {mensajes_correctos}")
     print(f"Cantidad de mensajes erróneos: {mensajes_erroneos}")
     print(f"Cantidad de mensajes corregidos: {mensajes_corregibles}")
+=======
+    matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_bits_recibido)
+    print(matriz_probabilidades)
+    # print(matriz_probabilidades)
+>>>>>>> origin/main
