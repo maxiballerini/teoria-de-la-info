@@ -170,20 +170,19 @@ def verificar_mensajes(array_matrices1, array_matrices2):
     # Retornar los conteos
     return correctos, corregibles, erroneos
 
-def calcular_entropias_a_priori(probs, N):
+def calcular_entropias_a_priori(probs):
     entropia = 0
-    for i in range(N):
-        for p in probs:
-            if p > 0:  # Evitar logaritmo de 0
-                entropia +=p * (math.log2(1 / p))  # Fórmula de entropía
+    for p in probs:
+        if p > 0:  # Evitar logaritmo de 0
+            entropia +=p * (math.log2(1 / p))  # Fórmula de entropía
     return entropia
 
-def calcular_entropias_a_posteriori(matriz_probs, N):
+def calcular_entropias_a_posteriori(matriz_probs):
     entropias = []  # Lista para almacenar las entropías a posteriori de cada conjunto
 
-    for j in range(len(matriz_probs[0])):  # Para cada símbolo de salida bj
+    for j in range(2):  # Para cada símbolo de salida bj
         entropia = 0
-        for i in range(N):  # Para cada símbolo de entrada ai
+        for i in range(2):  # Para cada símbolo de entrada ai
             prob = matriz_probs[i][j]
             if prob > 0:  # Evitar logaritmo de 0
                 entropia -= prob * math.log2(prob)  # Fórmula de entropía
@@ -219,8 +218,8 @@ else:
     print(f"Cantidad de mensajes erróneos: {mensajes_erroneos}")
     print(f"Cantidad de mensajes corregidos: {mensajes_corregibles}")
 
-    entropia_a_priori = calcular_entropias_a_priori(vector_probabilidades, N)
-    entropias_posteriori = calcular_entropias_a_posteriori(matriz_probabilidades, N)
+    entropia_a_priori = calcular_entropias_a_priori(vector_probabilidades)
+    entropias_posteriori = calcular_entropias_a_posteriori(matriz_probabilidades)
     print(f"Entropía a priori: {entropia_a_priori:.6f} binits")
     print(f"Entropías a posteriori: H(0) = {entropias_posteriori[0]:.6f} binits , H(1) = {entropias_posteriori[1]:.6f} binits")
 
