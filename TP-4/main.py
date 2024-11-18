@@ -34,16 +34,17 @@ def calcular_entropia(vec_probabilidades):
     return suma
 
 def bits_a_vector_de_matrices(bits_recived, N):
-
     total_bits = len(bits_recived)
     bits_por_matriz = N * N
     # Convertir la cadena de bits a una lista de enteros (0 o 1)
     bits = [int(b) for b in bits_recived]
 
-    #Crear las matrices N x N y almacenarlas en un vector
+    # Crear las matrices N x N y almacenarlas en un vector
     vector_de_matrices_recived = []
     for i in range(0, total_bits, bits_por_matriz):
-        matriz = np.array(bits[i:i + bits_por_matriz]).reshape(N, N)
+        matriz_lineal = np.array(bits[i:i + bits_por_matriz])
+        # Reorganizar los datos en una matriz N x N llenada por columnas
+        matriz = matriz_lineal.reshape(N, N, order='F')
         vector_de_matrices_recived.append(matriz)
 
     return vector_de_matrices_recived
@@ -113,6 +114,21 @@ def calcular_matriz_probabilidad(bits_transmitidos, bits_recibidos):
     
     return matriz_probabilidad
 
+def extraer_bits_matrices(matrices_received, N):
+    # Lista para almacenar los bits extraídos
+    contenido_bits_recibido = []
+
+    # Iterar sobre las matrices recibidas
+    for matriz in matrices_received:
+        # Validar que la matriz sea de tamaño N x N
+        if matriz.shape[0] == N and matriz.shape[1] == N:
+            # Recorrer hasta la penúltima columna y fila
+            for j in range(N - 1):  # Recorrer columnas
+                for i in range(N - 1):  # Recorrer filas
+                    contenido_bits_recibido.append(matriz[i, j])
+                    
+    return contenido_bits_recibido   
+
 if len(sys.argv) != 4:
     print("Uso: python tpi4.py <sent> <received> <N>")
 else:
@@ -128,6 +144,8 @@ else:
     matrices_received = bits_a_vector_de_matrices(contenido_binario_recibido, N + 1)
     # Sacar el comentario para ver como queda una matriz
     print(f"a)Entropía: {entropia:.6f} binits")
-    # contenido_bits_recibido = convertir_a_bits(contenido_binario_recibido)
-    # matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
+
+    contenido_bits_recibido = extraer_bits_matrices(matrices_received,N+1)
+    print(len(contenido_bits_recibido))
+    matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
     # print(matriz_probabilidades)
