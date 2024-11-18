@@ -172,30 +172,29 @@ def verificar_mensajes(array_matrices1, array_matrices2):
 if len(sys.argv) != 4:
     print("Uso: python tpi4.py <sent> <received> <N>")
 else:
+    # Guardo los parametros
     archivo_sent = sys.argv[1]
     archivo_received = sys.argv[2]
     N = int(sys.argv[3])
+
     contenido_binario_enviado = leer_archivo(archivo_sent)
     caracteres_unicos = obtener_caracteres_unicos(contenido_binario_enviado)
     vector_probabilidades = calcular_probabilidades(contenido_binario_enviado, caracteres_unicos)
     entropia = calcular_entropia(vector_probabilidades)
-    matrices = genera_matrices_paridad(contenido_binario_enviado, N) 
-    contenido_binario_recibido = leer_archivo(archivo_received)
-    matrices_received = bits_a_vector_de_matrices(contenido_binario_recibido, N + 1)
-    # Sacar el comentario para ver como queda una matriz
     print(f"a)Entropía: {entropia:.6f} binits")
 
-    contenido_bits_recibido = extraer_bits_matrices(matrices_received,N+1)
-<<<<<<< HEAD
+    matrices_sent = genera_matrices_paridad(contenido_binario_enviado, N) 
+    contenido_binario_recibido = leer_archivo(archivo_received)
+    matrices_received = bits_a_vector_de_matrices(contenido_binario_recibido, N + 1)
+
+    contenido_bits_recibido = extraer_bits_matrices(matrices_received, N + 1)
+    print(len(contenido_binario_enviado))
     print(len(contenido_bits_recibido))
-    # matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_binario_recibido)
-    # print(matriz_probabilidades)
-    mensajes_correctos, mensajes_erroneos, mensajes_corregibles = verificar_mensajes(matrices, matrices_received)
-    print(f"Cantidad de enviados correctamente: {mensajes_correctos}")
+    matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_bits_recibido)
+    print(f"c) {matriz_probabilidades}")
+
+    mensajes_correctos, mensajes_erroneos, mensajes_corregibles = verificar_mensajes(matrices_sent, matrices_received)
+    print(f"d) Cantidad de enviados correctamente: {mensajes_correctos}")
     print(f"Cantidad de mensajes erróneos: {mensajes_erroneos}")
     print(f"Cantidad de mensajes corregidos: {mensajes_corregibles}")
-=======
-    matriz_probabilidades = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_bits_recibido)
-    print(matriz_probabilidades)
-    # print(matriz_probabilidades)
->>>>>>> origin/main
+
