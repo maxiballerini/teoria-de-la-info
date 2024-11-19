@@ -27,11 +27,11 @@ def calcular_probabilidades(contenido, caracteres_unicos):
     # Calcula la probabilidad de cada bit único (1 o 0)
     probabilidades = [contador[caracter] / conteo_total for caracter in caracteres_unicos]
     return probabilidades
+
 def calcular_entropia(vec_probabilidades):
     suma = 0
     for i in range(len(vec_probabilidades)):
         suma += vec_probabilidades[i]*np.log2(1/vec_probabilidades[i])
-
     return suma
 
 def bits_a_vector_de_matrices(bits_recived, N):
@@ -52,8 +52,8 @@ def bits_a_vector_de_matrices(bits_recived, N):
 
 def calcular_vector_b(vector_a, matriz_condicional):
 
-    vector_a = np.array(vector_a)  # Convertimos a numpy array para cálculos vectoriales
-    matriz_condicional = np.array(matriz_condicional)  # Convertimos a numpy array
+    vector_a = np.array(vector_a) 
+    matriz_condicional = np.array(matriz_condicional)
     
     # Producto de P(ai) con cada columna de P(bj | ai)
     vector_b = np.dot(vector_a, matriz_condicional)  # Multiplicación de matriz por vector
@@ -86,7 +86,6 @@ def genera_matrices_paridad(contenido, N):
             matriz_datos = np.zeros((N, N), dtype=int)  # Nueva matriz vacía
             bit_index = 0  # Reiniciar el índice de bits para la nueva matriz
     
-    # Si hay una matriz incompleta (no llena pero con algunos bits), agregarla
     if bit_index > 0:
         matriz_paridad = np.zeros((N + 1, N + 1), dtype=int)
         matriz_paridad[:N, :N] = matriz_datos  # Copiar datos a la matriz extendida
@@ -182,11 +181,11 @@ def verificar_mensajes(array_matrices1, array_matrices2):
 
 def calcular_probabilidades_conjuntas(vector_a, matriz_condicional):
 
-    vector_a = np.array(vector_a)  # Convertimos a numpy array
-    matriz_condicional = np.array(matriz_condicional)  # Convertimos a numpy array
+    vector_a = np.array(vector_a) 
+    matriz_condicional = np.array(matriz_condicional) 
 
     # Calcular P(ai, bj) = P(ai) * P(bj | ai)
-    matriz_conjunta = matriz_condicional * vector_a[:, np.newaxis]  # Broadcasting para multiplicación
+    matriz_conjunta = matriz_condicional * vector_a[:, np.newaxis] 
 
     return matriz_conjunta.tolist()
 
