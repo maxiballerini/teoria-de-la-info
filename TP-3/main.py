@@ -76,30 +76,32 @@ def convertir_cadena(cadena_bits):
     
     # Agrupa los bits en bytes
     for i in range(0, longitud_original, 8):
-        byte_str = cadena_bits[i:i+8]  # Obtiene un grupo de 8 bits
-        if len(byte_str) < 8:
+        sublista_bits = cadena_bits[i:i+8]  # Obtiene un grupo de 8 bits
+        while len(sublista_bits) < 8:
             # Si el último grupo tiene menos de 8 bits, completa con ceros a la derecha
-            byte_str = byte_str.ljust(8, '0')
+            sublista_bits.append(0)
         
-        # Convierte la cadena de bits a un entero
-        byte_val = int(byte_str, 2)  # Convierte de binario a entero
+        # Convierte la lista de bits a un entero
+        byte_val = 0
+        for bit in sublista_bits:
+            byte_val = (byte_val << 1) | bit
+            
         bytes_lista.append(byte_val)  # Añade el byte a la lista
     return bytes_lista
 
 def comprimir(diccionario, contenido_binario, nombre_archivo):
     with open(nombre_archivo, 'wb') as archivo:
-        vecaux = ""
+        vecaux = []
         for valor in contenido_binario:
-            vecaux += diccionario[valor]
+            for b in diccionario[valor]:
+                vecaux.extend([int(b)])
             
         longitud = len(vecaux)
         archivo.write(longitud.to_bytes(4, 'big')) # Se almacena la longitud exacta de bits
 
         # Serializar el diccionario
         # Almacenar como: [número de entradas del diccionario] [simbolo | longitud código | código binario]
-        print(len(diccionario))
         archivo.write(len(diccionario).to_bytes(2, 'big'))  # Máximo de 65535 símbolos
-        print(len(diccionario).to_bytes(2, 'big'))
 
         for simbolo, codigo_binario in diccionario.items():
             longitud_codigo = len(codigo_binario)
@@ -146,31 +148,37 @@ def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
         aux = interpretar_bits(bits_originales, diccionario)
         archivo.write(aux.encode('utf-8'))
 
-def calcular_metricas(archivo_original, archivo_comprimido):
+def calcular_tasa_compresion(archivo_original, archivo_comprimido):
     # Obtener el tamaño de los archivos en bytes
     tamaño_original = os.path.getsize(archivo_original)
     tamaño_comprimido = os.path.getsize(archivo_comprimido)
 
     # Calcular la tasa de compresión (TC)
-    tasa_compresion = tamaño_comprimido / tamaño_original
-
-    # Contar el número de símbolos en el archivo original
-    with open(archivo_original, 'rb') as f:
-        contenido = f.read()
-        n = len(contenido)  # Número de símbolos (caracteres)
-
-    # Calcular el rendimiento (R)
-    rendimiento = (tamaño_comprimido * 8) / n  # En bits por símbolo
-
-    # Calcular la redundancia
-    k = len(set(contenido)) 
-    log_k = math.log2(k)
-    redundancia = 1 - (rendimiento / log_k)
+    tasa_compresion = tamaño_original / tamaño_comprimido
 
     # Mostrar resultados
-    print(f"D)Tasa de compresión: {tasa_compresion:.4f}")
+    print(f"d)Tasa de compresión: {tasa_compresion:.2f}:1")
+
+def calcular_metricas(probabilidades, codigos):
+    # Entropía
+    entropia = 0
+    for prob in probabilidades.values():
+        entropia += prob * math.log2(1/prob)
+
+    # Longitud media del código
+    longitud_media = 0
+    for simbolo in probabilidades:
+        longitud_media += probabilidades[simbolo] * len(codigos[simbolo])
+
+    # Rendimiento
+    rendimiento = entropia / longitud_media if longitud_media > 0 else 0
+
+    # Redundancia
+    redundancia = 1 - rendimiento
+
     print(f"Rendimiento: {rendimiento:.4f} bits por símbolo")
     print(f"Redundancia: {redundancia:.4f}")
+    return 0
 
 def imprimir_tabla_frecuencias(probabilidades, diccionario):
     print("\nTabla de frecuencias:")
@@ -195,21 +203,20 @@ inicio = time.time()  # inicio del tiempo
 if flag == '-c':
     contenido_binario = abrir_archivo(original)
     probabilidades = obtener_probabilidades(contenido_binario)
-    print(probabilidades)
     arbol_Huffman = obtener_arbol_Huffman(probabilidades)
     diccionario = crear_diccionario(arbol_Huffman)
-    print(diccionario)
     comprimir(diccionario, contenido_binario, compressed)
-    #fin = time.time()  # final de tiempo
-    #print(f"\nTiempo de compresión solicitada: {fin - inicio:.4f} segundos")
-    #calcular_metricas(original, compressed)
+    fin = time.time()  # final de tiempo
+    print(f"c) La acción solicitada demoró: {fin - inicio:.4f} segundos")
+    calcular_tasa_compresion(original, compressed)
+    calcular_metricas(probabilidades, diccionario)
     # Activar esta función para ver la tabla de frecuencia de cada símbolo con su código
-    #imprimir_tabla_frecuencias(probabilidades, diccionario) 
+    imprimir_tabla_frecuencias(probabilidades, diccionario) 
 
 elif flag == '-d':
     descomprimir(compressed, original)
     fin = time.time()  # final de tiempo
-    print(f"\nTiempo de descompresión solicitada: {fin - inicio:.4f} segundos")
+    print(f"Tiempo de descompresión solicitada: {fin - inicio:.4f} segundos")
 
 else:
     print("FLAG INCORRECTA")
