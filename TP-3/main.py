@@ -20,22 +20,30 @@ def obtener_probabilidades(contenido):
     res = {}
     for byte_unico, frec in conteo_bytes.items():
         res[byte_unico] = float(frec) / total
-    #res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
+    #res = dict(sorted(res.items(), key=lambda item: item[1], reverse=False))
     return res
 
 def obtener_arbol_Huffman(probabilidades):
     fila_prioridad = []
 
     for simbolo,probabilidad in probabilidades.items():
-        heapq.heappush(fila_prioridad, (probabilidad, 0, simbolo)) 
+        fila_prioridad.append((probabilidad, 0, simbolo))
+    
+    fila_prioridad.sort()
 
     while len(fila_prioridad) > 1:
-        menos_probable = heapq.heappop(fila_prioridad) 
-        seg_menos_probable = heapq.heappop(fila_prioridad) 
-        # Este nuevo nodo tiene probabilidad e1[0]+e2[0]
-        # y profundidad mayor al nuevo nodo
-        nuevo_nodo = (menos_probable[0]+seg_menos_probable[0],max(menos_probable[1],seg_menos_probable[1])+1,[menos_probable,seg_menos_probable])
-        heapq.heappush(fila_prioridad,nuevo_nodo)
+        menos_probable = fila_prioridad.pop(0) 
+        seg_menos_probable = fila_prioridad.pop(0) 
+        
+        nuevo_nodo = (menos_probable[0] + seg_menos_probable[0], 
+                    max(menos_probable[1], seg_menos_probable[1]) + 1,
+                    [menos_probable, seg_menos_probable])
+        
+        fila_prioridad.append(nuevo_nodo)
+        fila_prioridad.sort()
+    
+    # Consultar si se puede utilizar libreria heapq o así está bien
+
     return fila_prioridad[0] # Devolvemos el arbol sin la fila
 
 
@@ -61,23 +69,6 @@ def crear_diccionario(arbol):
     
     return diccionario_codigos
 
-def interpretar_bits(vector_bits, diccionario):
-
-    diccionario_invertido = {v: k for k, v in diccionario.items()}
-    secuencia_ascii = ""  # Cadena para almacenar la secuencia de caracteres ASCII resultante.
-    temp_bits = ""  # Cadena temporal para acumular los bits.
-
-    # Itera sobre cada bit en el vector de bits.
-    for bit in vector_bits:
-        temp_bits += bit  # Agrega el bit actual a la cadena temporal.
-        
-        # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
-        if temp_bits in diccionario_invertido:
-            simbolo = diccionario_invertido[temp_bits]  # Verifica si el valor del diccionario coincide con la cadena temporal.
-            secuencia_ascii += chr(simbolo) # Convierte la clave (número) a su carácter ASCII.
-            temp_bits = ""  # Reinicia la cadena temporal.
-
-    return secuencia_ascii
 
 def convertir_cadena(cadena_bits):
     bytes_lista = []
@@ -95,21 +86,49 @@ def convertir_cadena(cadena_bits):
         bytes_lista.append(byte_val)  # Añade el byte a la lista
     return bytes_lista
 
-def comprimir(diccionario, contenido_binario,nombre_archivo):
+def comprimir(diccionario, contenido_binario, nombre_archivo):
     with open(nombre_archivo, 'wb') as archivo:
         vecaux = ""
         for valor in contenido_binario:
             vecaux += diccionario[valor]
             
         longitud = len(vecaux)
-        #se guarda un int (4 bytes) que indica la longitud de la cadena comprimida para luego recortarla ya que
-        #podria pasar que cuando se convierte la cadena de bits a bytes esta se auntocomplete en el ultimo byte con 0
-        archivo.write(longitud.to_bytes(4, 'big'))
-        #se usa la libreria pickle donde "pickle.dump" es una fucnion encargada de alamcenar un diccionario en un archivo
-        pickle.dump(diccionario, archivo)
+        archivo.write(longitud.to_bytes(4, 'big')) # Se almacena la longitud exacta de bits
+
+        # Serializar el diccionario
+        # Almacenar como: [número de entradas del diccionario] [simbolo | longitud código | código binario]
+        print(len(diccionario))
+        archivo.write(len(diccionario).to_bytes(2, 'big'))  # Máximo de 65535 símbolos
+        print(len(diccionario).to_bytes(2, 'big'))
+
+        for simbolo, codigo_binario in diccionario.items():
+            longitud_codigo = len(codigo_binario)
+            # Escribir símbolo (asumimos que es un byte)
+            archivo.write(simbolo.to_bytes(1, 'big'))
+            # Escribir longitud del código
+            archivo.write(longitud_codigo.to_bytes(1, 'big'))
+            # Escribir el código binario como entero
+            archivo.write(int(codigo_binario, 2).to_bytes((longitud_codigo + 7) // 8, 'big'))
         archivo.write(bytearray(convertir_cadena(vecaux)))
     
 
+def interpretar_bits(vector_bits, diccionario):
+
+    diccionario_invertido = {v: k for k, v in diccionario.items()}
+    secuencia_ascii = ""  # Cadena para almacenar la secuencia de caracteres ASCII resultante.
+    temp_bits = ""  # Cadena temporal para acumular los bits.
+
+    # Itera sobre cada bit en el vector de bits.
+    for bit in vector_bits:
+        temp_bits += bit  # Agrega el bit actual a la cadena temporal.
+        
+        # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
+        if temp_bits in diccionario_invertido:
+            simbolo = diccionario_invertido[temp_bits]  # Verifica si el valor del diccionario coincide con la cadena temporal.
+            secuencia_ascii += chr(simbolo) # Convierte la clave (número) a su carácter ASCII.
+            temp_bits = ""  # Reinicia la cadena temporal.
+
+    return secuencia_ascii
 
 def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
     with open(nombre_archivo_comprimido, 'rb') as archivo:
@@ -176,12 +195,14 @@ inicio = time.time()  # inicio del tiempo
 if flag == '-c':
     contenido_binario = abrir_archivo(original)
     probabilidades = obtener_probabilidades(contenido_binario)
+    print(probabilidades)
     arbol_Huffman = obtener_arbol_Huffman(probabilidades)
     diccionario = crear_diccionario(arbol_Huffman)
+    print(diccionario)
     comprimir(diccionario, contenido_binario, compressed)
-    fin = time.time()  # final de tiempo
-    print(f"\nTiempo de compresión solicitada: {fin - inicio:.4f} segundos")
-    calcular_metricas(original, compressed)
+    #fin = time.time()  # final de tiempo
+    #print(f"\nTiempo de compresión solicitada: {fin - inicio:.4f} segundos")
+    #calcular_metricas(original, compressed)
     # Activar esta función para ver la tabla de frecuencia de cada símbolo con su código
     #imprimir_tabla_frecuencias(probabilidades, diccionario) 
 
