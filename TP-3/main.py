@@ -114,39 +114,54 @@ def comprimir(diccionario, contenido_binario, nombre_archivo):
         archivo.write(bytearray(convertir_cadena(vecaux)))
     
 
-def interpretar_bits(vector_bits, diccionario):
+def interpretar_bits(bits, diccionario):
+    # Crear el diccionario para buscar simbolos a partir de codigos binarios
+    codigos_a_simbolos = {codigo: simbolo for simbolo, codigo in diccionario.items()}
 
-    diccionario_invertido = {v: k for k, v in diccionario.items()}
-    secuencia_ascii = ""  # Cadena para almacenar la secuencia de caracteres ASCII resultante.
+        
+    resultado = []  # Lista apra almacenar la secuencia de símbolos decodificados
     temp_bits = ""  # Cadena temporal para acumular los bits.
 
     # Itera sobre cada bit en el vector de bits.
-    for bit in vector_bits:
+    for bit in bits:
         temp_bits += bit  # Agrega el bit actual a la cadena temporal.
         
         # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
-        if temp_bits in diccionario_invertido:
-            simbolo = diccionario_invertido[temp_bits]  # Verifica si el valor del diccionario coincide con la cadena temporal.
-            secuencia_ascii += chr(simbolo) # Convierte la clave (número) a su carácter ASCII.
+        if temp_bits in codigos_a_simbolos:
+            resultado.append(codigos_a_simbolos[temp_bits]) # Verifica si el valor del diccionario coincide con la cadena temporal.
+            #secuencia_ascii += chr(simbolo) # Convierte la clave (número) a su carácter ASCII.
             temp_bits = ""  # Reinicia la cadena temporal.
 
-    return secuencia_ascii
+    return resultado
 
 def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
     with open(nombre_archivo_comprimido, 'rb') as archivo:
         #se leen los primeros 4 bytes para indetificar la longitud de la cadena original de bits a descomprimir
         longitud_original = int.from_bytes(archivo.read(4), 'big')
-        #se recupera el diccionario
-        diccionario = pickle.load(archivo)
-        contenido_descomprimido = archivo.read()
+
+        tamaño_diccionario = int.from_bytes(archivo.read(2), 'big')
+
+        #Se reconstruye el diccionario
+        diccionario = {}
+        for _ in range(tamaño_diccionario):
+            simbolo = archivo.read(1)[0]  # Leer el símbolo (1 byte)
+            longitud_codigo = int.from_bytes(archivo.read(1), 'big')  # Leer longitud del código
+            # Leer el código en binario
+            codigo_bytes = archivo.read((longitud_codigo + 7) // 8) 
+            codigo_binario = ''.join(f'{byte:08b}' for byte in codigo_bytes)[:longitud_codigo]
+            diccionario[simbolo] = codigo_binario
+
+        contenido_comprimido = archivo.read()
         # Se convierte cada byte del contenido leído en una representación binaria de 8 bits
-        bits = ''.join(f'{byte:08b}' for byte in contenido_descomprimido)
-        #se acorta la cadena a su longitud original
-        bits_originales = bits[:longitud_original]
+        cadena_bits = ''.join(f'{byte:08b}' for byte in contenido_comprimido)
+        cadena_bits = cadena_bits[:longitud_original]
+        
+    contenido_descomprimido = interpretar_bits(cadena_bits, diccionario)
 
     with open(nombre_archivo_descomprimido, 'wb') as archivo:
-        aux = interpretar_bits(bits_originales, diccionario)
-        archivo.write(aux.encode('utf-8'))
+        archivo.write(bytearray(contenido_descomprimido))
+    
+    return diccionario, contenido_descomprimido
 
 def calcular_tasa_compresion(archivo_original, archivo_comprimido):
     # Obtener el tamaño de los archivos en bytes
@@ -178,7 +193,6 @@ def calcular_metricas(probabilidades, codigos):
 
     print(f"Rendimiento: {rendimiento:.4f} bits por símbolo")
     print(f"Redundancia: {redundancia:.4f}")
-    return 0
 
 def imprimir_tabla_frecuencias(probabilidades, diccionario):
     print("\nTabla de frecuencias:")
@@ -214,9 +228,11 @@ if flag == '-c':
     imprimir_tabla_frecuencias(probabilidades, diccionario) 
 
 elif flag == '-d':
-    descomprimir(compressed, original)
+    diccionario, contenido_binario = descomprimir(compressed, original)
+    probabilidades = obtener_probabilidades(contenido_binario)
     fin = time.time()  # final de tiempo
-    print(f"Tiempo de descompresión solicitada: {fin - inicio:.4f} segundos")
-
+    print(f"c) La acción solicitada demoró: {fin - inicio:.4f} segundos")
+    calcular_tasa_compresion(original, compressed)
+    calcular_metricas(probabilidades, diccionario)
 else:
     print("FLAG INCORRECTA")
