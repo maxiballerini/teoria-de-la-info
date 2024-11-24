@@ -115,11 +115,11 @@ def comprimir(diccionario, contenido_binario, nombre_archivo):
     
 
 def interpretar_bits(bits, diccionario):
-    # Crear el diccionario para buscar simbolos a partir de codigos binarios
+    # Crear diccionario invertido para buscar simbolos a partir de codigos binarios
     codigos_a_simbolos = {codigo: simbolo for simbolo, codigo in diccionario.items()}
 
         
-    resultado = []  # Lista apra almacenar la secuencia de símbolos decodificados
+    resultado = []  # Lista para almacenar la secuencia de símbolos decodificados
     temp_bits = ""  # Cadena temporal para acumular los bits.
 
     # Itera sobre cada bit en el vector de bits.
@@ -129,7 +129,6 @@ def interpretar_bits(bits, diccionario):
         # Comprueba si la cadena temporal coincide con alguna clave en el diccionario.
         if temp_bits in codigos_a_simbolos:
             resultado.append(codigos_a_simbolos[temp_bits]) # Verifica si el valor del diccionario coincide con la cadena temporal.
-            #secuencia_ascii += chr(simbolo) # Convierte la clave (número) a su carácter ASCII.
             temp_bits = ""  # Reinicia la cadena temporal.
 
     return resultado
@@ -145,17 +144,18 @@ def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
         diccionario = {}
         for _ in range(tamaño_diccionario):
             simbolo = archivo.read(1)[0]  # Leer el símbolo (1 byte)
-            longitud_codigo = int.from_bytes(archivo.read(1), 'big')  # Leer longitud del código
+            longitud_codigo = archivo.read(1)[0]  # Leer longitud del código
             # Leer el código en binario
             codigo_bytes = archivo.read((longitud_codigo + 7) // 8) 
-            codigo_binario = ''.join(f'{byte:08b}' for byte in codigo_bytes)[:longitud_codigo]
+            codigo_binario = ''.join(f'{byte:08b}' for byte in codigo_bytes)
+            codigo_binario = codigo_binario[-longitud_codigo:] # Dejar solo los bits del codigo
             diccionario[simbolo] = codigo_binario
 
         contenido_comprimido = archivo.read()
         # Se convierte cada byte del contenido leído en una representación binaria de 8 bits
         cadena_bits = ''.join(f'{byte:08b}' for byte in contenido_comprimido)
         cadena_bits = cadena_bits[:longitud_original]
-        
+    print(diccionario)
     contenido_descomprimido = interpretar_bits(cadena_bits, diccionario)
 
     with open(nombre_archivo_descomprimido, 'wb') as archivo:
