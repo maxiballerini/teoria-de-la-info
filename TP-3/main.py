@@ -1,7 +1,6 @@
 import os
 import heapq
 from collections import Counter
-import pickle
 import sys
 import time
 import math
@@ -20,7 +19,6 @@ def obtener_probabilidades(contenido):
     res = {}
     for byte_unico, frec in conteo_bytes.items():
         res[byte_unico] = float(frec) / total
-    #res = dict(sorted(res.items(), key=lambda item: item[1], reverse=False))
     return res
 
 def obtener_arbol_Huffman(probabilidades):
@@ -155,7 +153,7 @@ def descomprimir(nombre_archivo_comprimido, nombre_archivo_descomprimido):
         # Se convierte cada byte del contenido leído en una representación binaria de 8 bits
         cadena_bits = ''.join(f'{byte:08b}' for byte in contenido_comprimido)
         cadena_bits = cadena_bits[:longitud_original]
-    print(diccionario)
+    #print(diccionario)
     contenido_descomprimido = interpretar_bits(cadena_bits, diccionario)
 
     with open(nombre_archivo_descomprimido, 'wb') as archivo:
@@ -172,7 +170,7 @@ def calcular_tasa_compresion(archivo_original, archivo_comprimido):
     tasa_compresion = tamaño_original / tamaño_comprimido
 
     # Mostrar resultados
-    print(f"d)Tasa de compresión: {tasa_compresion:.2f}:1")
+    print(f"Tasa de compresión: {tasa_compresion:.2f}:1")
 
 def calcular_metricas(probabilidades, codigos):
     # Entropía
@@ -221,7 +219,7 @@ if flag == '-c':
     diccionario = crear_diccionario(arbol_Huffman)
     comprimir(diccionario, contenido_binario, compressed)
     fin = time.time()  # final de tiempo
-    print(f"c) La acción solicitada demoró: {fin - inicio:.4f} segundos")
+    print(f"El proceso de compresión demoró: {fin - inicio:.4f} segundos")
     calcular_tasa_compresion(original, compressed)
     calcular_metricas(probabilidades, diccionario)
     # Activar esta función para ver la tabla de frecuencia de cada símbolo con su código
@@ -231,7 +229,7 @@ elif flag == '-d':
     diccionario, contenido_binario = descomprimir(compressed, original)
     probabilidades = obtener_probabilidades(contenido_binario)
     fin = time.time()  # final de tiempo
-    print(f"c) La acción solicitada demoró: {fin - inicio:.4f} segundos")
+    print(f"El proceso de descompresión demoró: {fin - inicio:.4f} segundos")
     calcular_tasa_compresion(original, compressed)
     calcular_metricas(probabilidades, diccionario)
 else:
