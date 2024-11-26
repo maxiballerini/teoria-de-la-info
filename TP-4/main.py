@@ -76,21 +76,14 @@ def calcular_matriz_probabilidad(bits_transmitidos, bits_recibidos):
     return matriz_probabilidad
 
 def calcular_probabilidades(contenido):
-    # Cuenta las ocurrencias de '0' y '1'
     conteo_total = len(contenido)
-    prob_0 = contenido.count('0') / conteo_total if conteo_total > 0 else 0
-    prob_1 = contenido.count('1') / conteo_total if conteo_total > 0 else 0
+    if conteo_total == 0:  # Manejar el caso de un vector vacío
+        return [0, 0]
     
-    # Retorna las probabilidades en orden [P(0), P(1)]
-    return [prob_0, prob_1]
-
-def calcular_probabilidades(contenido):
-    # Cuenta las ocurrencias de '0' y '1'
-    conteo_total = len(contenido)
-    prob_0 = contenido.count('0') / conteo_total if conteo_total > 0 else 0
-    prob_1 = contenido.count('1') / conteo_total if conteo_total > 0 else 0
+    # Contar las ocurrencias de 0 y 1
+    prob_0 = contenido.count(0) / conteo_total
+    prob_1 = contenido.count(1) / conteo_total
     
-    # Retorna las probabilidades en orden [P(0), P(1)]
     return [prob_0, prob_1]
 
 def calcular_entropia(vec_probabilidades):
@@ -219,6 +212,7 @@ def calcular_perdida(matriz_condicional, matriz_conjunta):
             p_b_a = matriz_condicional[i][j]  # P(b|a)
             if p_ab > 0 and p_b_a > 0:  # Evitar logaritmos de 0
                 perdida += p_ab * math.log2(1 / p_b_a)
+    return perdida
 
 
 if len(sys.argv) != 4:
@@ -232,9 +226,7 @@ else:
     contenido_enviado = leer_archivo(archivo_sent)
     contenido_enviado = agrega_paridad(contenido_enviado,N)
     contenido_recibido = leer_archivo(archivo_received)
-
     vec_probabilidadA = calcular_probabilidades(contenido_enviado)
-    print(vec_probabilidadA)
     entropia_de_la_fuente = calcular_entropia(vec_probabilidadA)
 
 
