@@ -15,52 +15,7 @@ def leer_archivo(nombre_archivo):
     
     return bits
 
-def obtener_caracteres_unicos(contenido):
-    # Obtiene una lista de caracteres únicos en el contenido (en este caso, los bits únicos)
-    return list(set(contenido))
-
-def calcular_probabilidades(contenido, caracteres_unicos):
-    # Cuenta las ocurrencias de cada bit (1 o 0)
-    conteo_total = len(contenido)
-    contador = Counter(contenido)
-    
-    # Calcula la probabilidad de cada bit único (1 o 0)
-    probabilidades = [contador[caracter] / conteo_total for caracter in caracteres_unicos]
-    return probabilidades
-
-def calcular_entropia(vec_probabilidades):
-    suma = 0
-    for i in range(len(vec_probabilidades)):
-        suma += vec_probabilidades[i]*np.log2(1/vec_probabilidades[i])
-    return suma
-
-def bits_a_vector_de_matrices(bits_recived, N):
-    total_bits = len(bits_recived)
-    bits_por_matriz = N * N
-    # Convertir la cadena de bits a una lista de enteros (0 o 1)
-    bits = [int(b) for b in bits_recived]
-
-    # Crear las matrices N x N y almacenarlas en un vector
-    vector_de_matrices_recived = []
-    for i in range(0, total_bits, bits_por_matriz):
-        matriz_lineal = np.array(bits[i:i + bits_por_matriz])
-        # Reorganizar los datos en una matriz N x N llenada por columnas
-        matriz = matriz_lineal.reshape(N, N, order='F')
-        vector_de_matrices_recived.append(matriz)
-
-    return vector_de_matrices_recived
-
-def calcular_vector_b(vector_a, matriz_condicional):
-
-    vector_a = np.array(vector_a) 
-    matriz_condicional = np.array(matriz_condicional)
-    
-    # Producto de P(ai) con cada columna de P(bj | ai)
-    vector_b = np.dot(vector_a, matriz_condicional)  # Multiplicación de matriz por vector
-    
-    return vector_b.tolist() 
-
-def genera_matrices_paridad(contenido, N):
+def agrega_paridad(contenido, N):
     matrices = []  # Lista para almacenar las matrices generadas
     matriz_datos = np.zeros((N, N), dtype=int)  # Inicializar la matriz de ceros con una fila y columna extra
     bit_index = 0  # Índice para rastrear la posición del bit en la matriz actual
@@ -95,15 +50,11 @@ def genera_matrices_paridad(contenido, N):
         matriz_paridad[N, N] = matriz_datos.sum() % 2 # Calculo de paridad cruzada que comprueba paridades
         matrices.append(matriz_paridad)
     
-    return matrices
-
-def convertir_a_bits(contenido):
-    # Convertir el contenido binario a una lista de bits
-    bits = []
-    for byte in contenido:
-        # Convertir cada byte a su representación binaria de 8 bits
-        bits.extend([int(bit) for bit in f'{byte:08b}'])
-    return bits
+    vector_lineal = []
+    for matriz in matrices:
+        vector_lineal.extend([int(x) for x in matriz.flatten(order='C')])
+    
+    return vector_lineal
 
 def calcular_matriz_probabilidad(bits_transmitidos, bits_recibidos):
     # Inicializar la matriz de probabilidades (2x2)
@@ -124,61 +75,40 @@ def calcular_matriz_probabilidad(bits_transmitidos, bits_recibidos):
     
     return matriz_probabilidad
 
-def extraer_bits_matrices(matrices_received, N):
-    # Lista para almacenar los bits extraídos
-    contenido_bits_recibido = []
+def calcular_probabilidades(contenido):
+    # Cuenta las ocurrencias de '0' y '1'
+    conteo_total = len(contenido)
+    prob_0 = contenido.count('0') / conteo_total if conteo_total > 0 else 0
+    prob_1 = contenido.count('1') / conteo_total if conteo_total > 0 else 0
+    
+    # Retorna las probabilidades en orden [P(0), P(1)]
+    return [prob_0, prob_1]
 
-    # Iterar sobre las matrices recibidas
-    for matriz in matrices_received:
-        # Validar que la matriz sea de tamaño N x N
-        if matriz.shape[0] == N and matriz.shape[1] == N:
-            # Recorrer hasta la penúltima columna y fila
-            for j in range(N - 1):  # Recorrer columnas
-                for i in range(N - 1):  # Recorrer filas
-                    contenido_bits_recibido.append(matriz[i, j])
-                    
-    return contenido_bits_recibido
+def calcular_probabilidades(contenido):
+    # Cuenta las ocurrencias de '0' y '1'
+    conteo_total = len(contenido)
+    prob_0 = contenido.count('0') / conteo_total if conteo_total > 0 else 0
+    prob_1 = contenido.count('1') / conteo_total if conteo_total > 0 else 0
+    
+    # Retorna las probabilidades en orden [P(0), P(1)]
+    return [prob_0, prob_1]
 
-def verificar_mensajes(array_matrices1, array_matrices2):
-    def obtener_bits_paridad(matriz):
-        N = matriz.shape[0] - 1  # Tamaño real de la matriz sin la fila y columna de paridad
-        # Obtener bits de paridad
-        paridad_lrc = matriz[N, :-1]  # Última fila sin el bit de paridad cruzada
-        paridad_vrc = matriz[:-1, N]  # Última columna sin el bit de paridad cruzada
-        paridad_cruzada = matriz[N, N]  # Bit de paridad cruzada
-        return paridad_lrc, paridad_vrc, paridad_cruzada
+def calcular_entropia(vec_probabilidades):
+    suma = 0
+    for prob in vec_probabilidades:
+        if prob > 0:  # Evitar problemas con log(0)
+            suma += prob * np.log2(1 / prob)
+    return suma
 
-    # Contadores de resultados
-    correctos = 0
-    corregibles = 0
-    erroneos = 0
+def calcular_vector_B(vector_a, matriz_condicional):
 
-    # Iterar sobre los pares de matrices
-    for matriz1, matriz2 in zip(array_matrices1, array_matrices2):
-        # Obtener los bits de paridad de ambas matrices
-        lrc1, vrc1, cruzada1 = obtener_bits_paridad(matriz1)
-        lrc2, vrc2, cruzada2 = obtener_bits_paridad(matriz2)
-
-        # Comparar bits de paridad
-        errores = 0
-        if not np.array_equal(lrc1, lrc2):
-            errores += 1
-        if not np.array_equal(vrc1, vrc2):
-            errores += 1
-        if cruzada1 != cruzada2:
-            errores += 1
-
-        # Determinar el estado del mensaje
-        if errores == 0:
-            correctos += 1
-        elif errores == 1 or (errores == 2 and cruzada1 != cruzada2):
-            corregibles += 1
-        else:
-            erroneos += 1
-
-    # Retornar los conteos
-    return correctos, corregibles, erroneos
-
+    vector_a = np.array(vector_a) 
+    matriz_condicional = np.array(matriz_condicional)
+    
+    # Producto de P(ai) con cada columna de P(bj | ai)
+    vector_b = np.dot(vector_a, matriz_condicional)  # Multiplicación de matriz por vector
+    
+    return vector_b.tolist() 
 def calcular_probabilidades_conjuntas(vector_a, matriz_condicional):
 
     vector_a = np.array(vector_a) 
@@ -204,6 +134,49 @@ def calcular_matriz_condicional(matriz_conjunta, probs_b):
         matriz_condicional.append(fila_condicional)  # Añadimos la fila a la matriz
 
     return matriz_condicional
+
+def bits_a_vector_de_matrices(bits_recived, N):
+    total_bits = len(bits_recived)
+    bits_por_matriz = N * N
+    # Convertir la cadena de bits a una lista de enteros (0 o 1)
+    bits = [int(b) for b in bits_recived]
+
+    # Crear las matrices N x N y almacenarlas en un vector
+    vector_de_matrices_recived = []
+    for i in range(0, total_bits, bits_por_matriz):
+        matriz_lineal = np.array(bits[i:i + bits_por_matriz])
+        # Reorganizar los datos en una matriz N x N llenada por columnas
+        matriz = matriz_lineal.reshape(N, N, order='F')
+        vector_de_matrices_recived.append(matriz)
+
+    return vector_de_matrices_recived
+
+def verificar_mensajes(array_matrices):
+    # Contadores de resultados
+    correctos = 0
+    corregibles = 0
+    erroneos = 0
+    # Iterar sobre las matrices recibidas
+    for matriz in array_matrices:
+        N = matriz.shape[0] # Tamaño de la matriz con bits de paridad
+
+        # Verificar paridad por filas 
+        errores_filas = 0
+        for i in range(N):
+            errores_filas += sum(matriz[i, :N]) % 2
+
+        # Verificar paridad por columnas
+        errores_columnas = 0
+        for j in range(N):
+            errores_columnas += sum(matriz[:N, j]) % 2
+        if errores_filas == 0 and errores_columnas == 0:
+            correctos += 1  # No hay errores
+        elif errores_filas == 1 and errores_columnas == 1:
+            corregibles += 1  # Un error en fila, un error en columna
+        else:
+            erroneos += 1  # Más de dos errores
+
+    return correctos, corregibles, erroneos
 
 def calcular_entropia_a_priori(probs):
     entropia = 0
@@ -247,47 +220,40 @@ def calcular_perdida(matriz_condicional, matriz_conjunta):
             if p_ab > 0 and p_b_a > 0:  # Evitar logaritmos de 0
                 perdida += p_ab * math.log2(1 / p_b_a)
 
-    return perdida 
 
 if len(sys.argv) != 4:
     print("Uso: python main.py <sent> <received> <N>")
+
 else:
-    # Guardo los parametros
     archivo_sent = sys.argv[1]
     archivo_received = sys.argv[2]
     N = int(sys.argv[3])
 
-    contenido_binario_enviado = leer_archivo(archivo_sent)
-    caracteres_unicos = obtener_caracteres_unicos(contenido_binario_enviado)
-    vector_probabilidadesA = calcular_probabilidades(contenido_binario_enviado, caracteres_unicos)
-    entropia = calcular_entropia(vector_probabilidadesA)
-    print(f"a)Entropía: {entropia:.6f} binits")
+    contenido_enviado = leer_archivo(archivo_sent)
+    contenido_enviado = agrega_paridad(contenido_enviado,N)
+    contenido_recibido = leer_archivo(archivo_received)
 
-    matrices_sent = genera_matrices_paridad(contenido_binario_enviado, N) 
-    contenido_binario_recibido = leer_archivo(archivo_received)
-    matrices_received = bits_a_vector_de_matrices(contenido_binario_recibido, N + 1)
+    vec_probabilidadA = calcular_probabilidades(contenido_enviado)
+    print(vec_probabilidadA)
+    entropia_de_la_fuente = calcular_entropia(vec_probabilidadA)
 
-    contenido_bits_recibido = extraer_bits_matrices(matrices_received, N + 1)
-    matriz_canal = calcular_matriz_probabilidad(contenido_binario_enviado, contenido_bits_recibido)
-    print(f"c) {matriz_canal}")
 
-    vector_probabilidadesB = calcular_vector_b(vector_probabilidadesA, matriz_canal)
-    matriz_conjunta = calcular_probabilidades_conjuntas(vector_probabilidadesA, matriz_canal)
+    print("la entropia de la fuente es: ", entropia_de_la_fuente)
+    matriz_canal = calcular_matriz_probabilidad(contenido_enviado, contenido_recibido)
+    print("la matriz del canal es: ", matriz_canal)
+    vector_probabilidadesB = calcular_vector_B(vec_probabilidadA, matriz_canal)
+    matriz_conjunta = calcular_probabilidades_conjuntas(vec_probabilidadA, matriz_canal)
     matriz_posteriori = calcular_matriz_condicional(matriz_conjunta, vector_probabilidadesB)
 
-
-    mensajes_correctos, mensajes_erroneos, mensajes_corregibles = verificar_mensajes(matrices_sent, matrices_received)
+    matrices_received = bits_a_vector_de_matrices(contenido_recibido, N + 1)
+    mensajes_correctos, mensajes_erroneos, mensajes_corregibles = verificar_mensajes(matrices_received)
     print(f"d) Cantidad de enviados correctamente: {mensajes_correctos}")
     print(f"Cantidad de mensajes erróneos: {mensajes_erroneos}")
     print(f"Cantidad de mensajes corregidos: {mensajes_corregibles}")
 
-    entropia_a_prioriA = calcular_entropia_a_priori(vector_probabilidadesA)
-    entropia_a_prioriB = calcular_entropia_a_priori(vector_probabilidadesB)
-    entropias_posterioriB = calcular_entropias_a_posteriori(matriz_canal)
+    entropia_a_prioriA = calcular_entropia_a_priori(vec_probabilidadA)
     entropias_posterioriA = calcular_entropias_a_posteriori(matriz_posteriori)
     print(f"e) Entropía a priori H(A): {entropia_a_prioriA:.6f} binits")
-    print(f"Entropía a priori H(B): {entropia_a_prioriB:.6f} binits")
-    print(f"Entropías a posteriori: H(B/0) = {entropias_posterioriB[0]:.6f} binits , H(B/1) = {entropias_posterioriB[1]:.6f} binits")
     print(f"Entropías a posteriori: H(A/0) = {entropias_posterioriA[0]:.6f} binits , H(A/1) = {entropias_posterioriA[1]:.6f} binits")
 
 
@@ -295,4 +261,6 @@ else:
     perdida = calcular_perdida(matriz_canal, matriz_conjunta)
     print(f"La información mutua es: {entropia_a_prioriA-equivocacion:.4f}")
     print(f"El ruido es: {equivocacion:4f}")
-    print(f"La perdida es: {perdida:4f}")
+    print(f"La perdida es: {perdida:4f}") 
+
+
