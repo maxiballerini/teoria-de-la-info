@@ -139,7 +139,7 @@ def bits_a_vector_de_matrices(bits_recived, N):
     for i in range(0, total_bits, bits_por_matriz):
         matriz_lineal = np.array(bits[i:i + bits_por_matriz])
         # Reorganizar los datos en una matriz N x N llenada por columnas
-        matriz = matriz_lineal.reshape(N, N, order='F')
+        matriz = matriz_lineal.reshape(N, N, order='C')
         vector_de_matrices_recived.append(matriz)
 
     return vector_de_matrices_recived
@@ -151,17 +151,20 @@ def verificar_mensajes(array_matrices):
     erroneos = 0
     # Iterar sobre las matrices recibidas
     for matriz in array_matrices:
-        N = matriz.shape[0] # Tamaño de la matriz con bits de paridad
+        N = matriz.shape[0] - 1 # Tamaño de la matriz con bits de paridad
 
         # Verificar paridad por filas 
         errores_filas = 0
         for i in range(N):
-            errores_filas += sum(matriz[i, :N]) % 2
+            if(sum(matriz[i, :N]) % 2 != matriz[i, N]):
+                errores_filas += 1
 
         # Verificar paridad por columnas
         errores_columnas = 0
         for j in range(N):
-            errores_columnas += sum(matriz[:N, j]) % 2
+            if(sum(matriz[:N, j]) % 2 != matriz[N, j]):
+                errores_columnas += 1
+
         if errores_filas == 0 and errores_columnas == 0:
             correctos += 1  # No hay errores
         elif errores_filas == 1 and errores_columnas == 1:
@@ -169,7 +172,7 @@ def verificar_mensajes(array_matrices):
         else:
             erroneos += 1  # Más de dos errores
 
-    return correctos, corregibles, erroneos
+    return correctos, erroneos, corregibles
 
 def calcular_entropia_a_priori(probs):
     entropia = 0
