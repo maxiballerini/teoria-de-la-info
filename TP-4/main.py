@@ -224,15 +224,17 @@ else:
     N = int(sys.argv[3])
 
     contenido_enviado = leer_archivo(archivo_sent)
-    contenido_enviado = agrega_paridad(contenido_enviado,N)
+    # Se almacena nuevamente el contenido del archivo en una lista pero con los bits de paridad añadidos
+    contenido_enviado = agrega_paridad(contenido_enviado, N)
     contenido_recibido = leer_archivo(archivo_received)
     vec_probabilidadA = calcular_probabilidades(contenido_enviado)
+    print(f"Vector probabilidades: {vec_probabilidadA}")
     entropia_de_la_fuente = calcular_entropia(vec_probabilidadA)
 
 
-    print("la entropia de la fuente es: ", entropia_de_la_fuente)
+    print(f"a) La entropia de la fuente es: {entropia_de_la_fuente:.6f} binits")
     matriz_canal = calcular_matriz_probabilidad(contenido_enviado, contenido_recibido)
-    print("la matriz del canal es: ", matriz_canal)
+    print("c) La matriz del canal es: \n", matriz_canal)
     vector_probabilidadesB = calcular_vector_B(vec_probabilidadA, matriz_canal)
     matriz_conjunta = calcular_probabilidades_conjuntas(vec_probabilidadA, matriz_canal)
     matriz_posteriori = calcular_matriz_condicional(matriz_conjunta, vector_probabilidadesB)
@@ -251,7 +253,7 @@ else:
 
     equivocacion = calcular_equivocacion(matriz_conjunta, matriz_posteriori)
     perdida = calcular_perdida(matriz_canal, matriz_conjunta)
-    print(f"La información mutua es: {entropia_a_prioriA-equivocacion:.4f}")
+    print(f"La información mutua es: {entropia_a_prioriA - equivocacion:.4f}")
     print(f"El ruido es: {equivocacion:4f}")
     print(f"La perdida es: {perdida:4f}") 
 
